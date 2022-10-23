@@ -1,0 +1,8 @@
+Takes in measurements made with the EPP
+Interpolates them to make a denser array of values
+Integrates to find the area under that curve
+Uses a minimization to find a line which bisects this area. It works by varying 
+the y coordinate of a point which when evaluated with the origin form a line.
+THIS MINIMIZATION DOES NOT WORK 
+The result of this is then used to find the coordinates of a rectangle with the
+same area as that under the curve.
