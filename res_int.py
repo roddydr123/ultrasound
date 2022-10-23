@@ -9,12 +9,11 @@ from scipy.interpolate import UnivariateSpline as us
 
 
 lengths = np.array([0, 0, 1.04, 1.82, 3.4, 6.32, 8.9, 11.71, 14.44, 15.00, 15.75])[::-1]
-# lengths = np.linspace(1, 0, 20)
 diameters = np.array([0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])[::-1]
-# diameters = 1 / np.linspace(0.00000001, 1, 20)
 inverse_diameters = 1 / diameters
+lengths *= 10   # convert to mm
 
-reference_y_coord = 0.2
+reference_x_coord = 0.02
 
 
 def get_line_eqn(p, q):
@@ -45,7 +44,7 @@ def bisectObjFunc(ycoord, args):
     d_lengths = args[2]
 
     # get equation of line.
-    m, c = get_line_eqn([0,0], [reference_y_coord, ycoord])
+    m, c = get_line_eqn([0,0], [reference_x_coord, ycoord])
 
     # get straight line vals for all 1/D vals
     d_linear_lengths = linear(d_inverse_diameters, m, c)
@@ -77,6 +76,24 @@ def rectSides(bisecting_coords, curve_area):
 
     return [x_side, y_side]
 
+def plotter(sides, d_inverse_diameters, d_lengths):
+
+    fig, ax = plt.subplots()
+    ax.scatter(sides[0], sides[1], c="k", marker="x")
+
+    ax.plot(d_inverse_diameters, d_lengths)
+    ax.set_xlabel("Inverse diameter (1/mm)")
+    ax.set_ylabel("Depth of field (mm)")
+
+    ax.vlines(sides[0], 0, sides[1], colors="k")
+    ax.hlines(sides[1], 0, sides[0], colors="k")
+
+    ax.set_ylim(0, ax.get_ylim()[1])
+    ax.set_xlim(0, ax.get_xlim()[1])
+
+    plt.show()
+
+
 def main():
 
     # new grid
@@ -86,12 +103,16 @@ def main():
     interp = us(inverse_diameters, lengths, s=0)
     d_lengths = interp(d_inverse_diameters)
 
+    # find the area under the curve (the resolution integral)
     area = abs(np.trapz(lengths, inverse_diameters))
-    # we have the area under the curve, now need to find the dimensions
-    # of a rectangle which matches this and bisects the curve
 
+    # bisecting lines are parametrised by the y coordinate of a point at
+    # reference_x_coord. This variable sets the range of y coords which
+    # are explored.
     ycoord_range = np.linspace(0, 5, 50)
 
+    # go through each bisecting line and find how well it bisects the
+    # resolution integral.
     n_bs = []
     for i in ycoord_range:
         n_bs.append(bisectObjFunc(i, [area, d_inverse_diameters, d_lengths]))
@@ -99,18 +120,16 @@ def main():
     # find the y coordinate which gives the smallest non_bisectionality
     y_min = ycoord_range[np.argmin(n_bs)]
 
-    # res_bisect = minimize(bisectObjFunc, [2], args=[area, d_inverse_diameters, d_lengths])
-    # print(res_bisect.x)
-
-    bisecting_coords = [[0,0], [reference_y_coord, y_min]]
-
+    # package up the best bisecting line coords and find the dimensions of
+    # the rectangle which has the same integral and is also bisected by the line.
+    # the sides are the characteristic resolution and the depth of field.
+    bisecting_coords = [[0,0], [reference_x_coord, y_min]]
     sides = rectSides(bisecting_coords, area)
-    print(sides)
-    plt.scatter(sides[0], sides[1])
-    # plt.plot(ycoord_range, n_bs)
-    plt.plot(d_inverse_diameters, d_lengths)
 
-    plt.show()
+    print(f"characteristic resolution: {np.round(1/sides[0], 2)}mm")
+    print(f"depth of field: {np.round(sides[1], 2)}mm")
+
+    plotter(sides, d_inverse_diameters, d_lengths)
 
 
 main()
