@@ -4,16 +4,28 @@ made with an ultrasound machine and Edinburgh Pipe Phantom (EPP).
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import minimize
 from scipy.interpolate import UnivariateSpline as us
 
 
-lengths = np.array([0, 0, 1.04, 1.82, 3.4, 6.32, 8.9, 11.71, 14.44, 15.00, 15.75])[::-1]
-diameters = np.array([0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])[::-1]
+# lengths = np.array([0, 0, 1.04, 1.82, 3.4, 6.32, 8.9, 11.71, 14.44, 15.00, 15.75])    # 9L first measurement 18/10/22
+# lengths = np.array([0, 0, 1.01, 3.34, 5.03, 6.21, 9.37, 12.17, 15.26, 15.73, 16.41])  # 9L second, 25/10/22
+# lengths = np.array([2.83, 3.24, 4.41, 5.05, 7.44, 8.12, 8.62, 9.47, 9.59, 9.93, 10.26])   # ML6-15 25/10/22
+# lengths = np.array([0.0, 2.9, 26.0, 40.3, 55.0, 71.0, 81.3, 89.7, 93.4, 94.6, 97.2, 98.6]) / 10   # NHS data for ML6-15 31/03/15
+# lengths = np.array([0.0,0.0,3.8,18.1,23.9,70.1,85.1,128.6,147.0,165.6,165.1, 192.0]) / 10 # NHS data for 9LD 01/04/15
+lengths = np.array([0.0,0.0,28.2,44.0,53.2,73.0,85.2,91.9,95.5,96.2,96.2,96.2]) / 10    # NHS data ML6-15 20/08/13
+# diameters = np.array([0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])
+diameters = np.array([0.35, 0.42, 0.56, 0.70, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 7.9, np.inf])   # NHS data
+diameters = diameters[::-1] / np.sqrt(np.cos(np.deg2rad(40))) # convert to effective diameter and reverse
 inverse_diameters = 1 / diameters
-lengths *= 10   # convert to mm
+lengths = lengths[::-1] * 10   # convert to mm
 
 reference_x_coord = 0.02
+
+
+class Line():
+    def __init__(self, point1, point2) -> None:
+        self.point1 = point1
+        self.point2 = point2
 
 
 def get_line_eqn(p, q):
@@ -76,6 +88,7 @@ def rectSides(bisecting_coords, curve_area):
 
     return [x_side, y_side]
 
+
 def plotter(sides, d_inverse_diameters, d_lengths):
 
     fig, ax = plt.subplots()
@@ -127,7 +140,8 @@ def main():
     sides = rectSides(bisecting_coords, area)
 
     print(f"characteristic resolution: {np.round(1/sides[0], 2)}mm")
-    print(f"depth of field: {np.round(sides[1], 2)}mm")
+    print(f"depth of field: {np.round(sides[1], 1)}mm")
+    print(f"Resolution integral: {np.round(area, 1)}mm^2")
 
     plotter(sides, d_inverse_diameters, d_lengths)
 
