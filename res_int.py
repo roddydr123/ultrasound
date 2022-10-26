@@ -23,27 +23,31 @@ reference_x_coord = 0.02
 
 
 class Line():
-    def __init__(self, point1, point2) -> None:
+    def __init__(self, point1, point2, xvals) -> None:
         self.point1 = point1
         self.point2 = point2
+        self.xvals = xvals
 
+    def get_line_eqn(self):
+        """
+        Given two points, return the coefficients of the equation of the
+        line between these points. ax + by = c
+        """
+        a = self.point2[1] - self.point1[1]
+        b = self.point2[0] - self.point1[0]
+        c = a * self.point1[0] + b * self.point2[0]
 
-def get_line_eqn(p, q):
-    """
-    Given two points, return the coefficients of the equation of the
-    line between these points. ax + by = c
-    """
-    a = q[1] - p[1]
-    b = q[0] - p[0]
-    c = a * p[0] + b * p[0]
+        m = a / b
+        new_c = c / b
+        return m, new_c
 
-    m = a / b
-    new_c = c / b
-    return m, new_c
+    def get_points_on_line(self):
+        m, c = self.get_line_eqn()
+        yvals = self.linear(self.xvals, m, c)
+        return yvals
 
-
-def linear(x, m, c):
-    return (m * x) + c
+    def linear(self, x, m, c):
+        return (m * x) + c
 
 
 def bisectObjFunc(ycoord, args):
@@ -55,11 +59,9 @@ def bisectObjFunc(ycoord, args):
     d_inverse_diameters = args[1]
     d_lengths = args[2]
 
-    # get equation of line.
-    m, c = get_line_eqn([0,0], [reference_x_coord, ycoord])
-
     # get straight line vals for all 1/D vals
-    d_linear_lengths = linear(d_inverse_diameters, m, c)
+    line = Line([0,0], [reference_x_coord, ycoord], d_inverse_diameters)
+    d_linear_lengths = line.get_points_on_line()
     # plt.plot(d_inverse_diameters, d_linear_lengths)
 
     # take only the section where the difference between the two lines is +ve
