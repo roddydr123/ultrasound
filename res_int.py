@@ -109,14 +109,35 @@ def plotter(sides, d_inverse_diameters, d_lengths):
     plt.show()
 
 
-def main():
+def main(steps):
+
+    # extrapolate to x axis and close integral
+
+    # find smallest detectable pipe index
+    s_index = np.argmin(lengths) - 1
+
+    extrap_inverse_diam = inverse_diameters[s_index] - (lengths[s_index] * (inverse_diameters[s_index-1] \
+                          - inverse_diameters[s_index])/(lengths[s_index-1] - lengths[s_index] + 0.00001)+0.00001)
+
+    # set the biggest invisible pipe to whichever's smaller out of the extrapolated inverse diameter
+    # or its usual inverse diameter.
+    if inverse_diameters[s_index + 1] > extrap_inverse_diam:
+        inverse_diameters[s_index + 1] = extrap_inverse_diam
+
+    lengths[s_index + 1:] = 0
 
     # new grid
     d_inverse_diameters = np.linspace(inverse_diameters[0], inverse_diameters[-1], int(1E4))
 
     # interpolate a denser resolution integral 
-    interp = us(inverse_diameters, lengths, s=0)
-    d_lengths = interp(d_inverse_diameters)
+    interp = us(inverse_diameters, lengths, s=0, k=1)
+    d_lengths = np.array(interp(d_inverse_diameters))
+
+    # make sure the splines arent bouncing around in the negatives or coming back from 0.
+    negative = np.where(d_lengths >= 0, d_lengths, np.zeros_like(d_lengths))
+    first_zero = np.argmin(negative)
+    negative[first_zero:] = 0
+    d_lengths = negative
 
     # find the area under the curve (the resolution integral)
     area = abs(np.trapz(lengths, inverse_diameters))
@@ -124,7 +145,7 @@ def main():
     # bisecting lines are parametrised by the y coordinate of a point at
     # reference_x_coord. This variable sets the range of y coords which
     # are explored.
-    ycoord_range = np.linspace(0, 5, 50)
+    ycoord_range = np.linspace(0, 5, steps)
 
     # go through each bisecting line and find how well it bisects the
     # resolution integral.
@@ -141,11 +162,24 @@ def main():
     bisecting_coords = [[0,0], [reference_x_coord, y_min]]
     sides = rectSides(bisecting_coords, area)
 
-    print(f"characteristic resolution: {np.round(1/sides[0], 2)}mm")
-    print(f"depth of field: {np.round(sides[1], 1)}mm")
-    print(f"Resolution integral: {np.round(area, 1)}mm^2")
+    print(f"characteristic resolution: {np.round(1/sides[0], 3)}mm")
+    print(f"depth of field: {np.round(sides[1], 2)}mm")
+    print(f"Resolution integral: {np.round(area, 2)}mm^2")
 
-    plotter(sides, d_inverse_diameters, d_lengths)
+    # plotter(sides, d_inverse_diameters, d_lengths)
+    return (np.round(1/sides[0], 3), np.round(sides[1], 2), np.round(area, 2))
 
+steps = np.arange(50, 20000, 2000)
+ydata = []
+y2 = []
+y3 = []
+for step in steps:
+    res = main(step)
+    ydata.append(res[0])
+    y2.append(res[1])
+    y3.append(res[2])
 
-main()
+# plt.plot(steps, ydata)
+# plt.plot(steps, y2)
+plt.plot(steps, y3)
+plt.show()
