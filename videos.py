@@ -8,16 +8,30 @@ PATH = "/mnt/c/users/david/Documents/uni/year-5/ultrasound/"
 
 
 class Video():
-    def __init__(self, filename, start_deep):
-        self.filename = filename
-        self.start_deep = start_deep
-        self.cap = cv2.VideoCapture(f"{PATH}/videos/{filename}")
+    def __init__(self, viddata):
+        self.filename = viddata["filename"]
+        self.start_deep = viddata["start_deep"]
+        self.total_depth = viddata["total_depth"]
+        self.roi = viddata["roi"]
+        self.cap = cv2.VideoCapture(f"{PATH}/videos/{self.filename}")
         self.frame_count = int(self.cap.get(7))
-        self.bkgd = self.get_bkgd()
+
+    def select_ROI(self, frame_index=0, roi=None):
+        if roi:
+            self.roi = roi
+        else:
+            self.cap.set(1, frame_index)
+            ret, frame = self.cap.read()
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            cv2.namedWindow("select window", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("select window", frame.shape[0], frame.shape[1])
+            self.roi = cv2.selectROI("select window", frame)
+        return self.roi
  
     def get_profile(self, frame):
         greyscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        roi = greyscale[114:700, 690:810]   # height, width
+        r = self.roi
+        roi = greyscale[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
         profile = np.average(list(roi), 1)
         # cv2.imwrite(PATH + "scripts/output.jpg", roi)
         return profile
@@ -26,7 +40,6 @@ class Video():
         if self.start_deep is True:
             self.cap.set(1, self.frame_count - 10)
             ret, frame = self.cap.read()
-            roi = cv2.selectROI("select image", frame)
             profile = self.get_profile(frame)
             end_bkgd = profile[-int(len(profile) / 2):]
 
@@ -50,8 +63,15 @@ class Video():
             bkgd = np.concatenate((start_bkgd, end_bkgd))
 
         if np.average(bkgd) < 2:
+            # to avoid joining errors between the two bkgds
             bkgd = np.zeros_like(bkgd)
 
+        if len(bkgd) < len(profile):
+            # when the profile is split, int()ing it can mean it loses
+            # an index. This re-adds it back in.
+            bkgd = np.insert(bkgd, -1, 0)
+
+        self.bkgd = bkgd
         return bkgd
 
     def analyseFrame(self, index, subtract_bkgd=True):
@@ -60,9 +80,9 @@ class Video():
         profile = self.get_profile(frame)
         if subtract_bkgd is True:
             profile -= self.bkgd
-        # x = np.linspace(0, len(profile), len(profile))
+        x = np.linspace(0, len(profile), len(profile))
         # plt.plot(x, profile)
-        peak, props = find_peaks(profile, distance=len(profile), width=0)
+        peak, props = find_peaks(profile, distance=len(profile), width=(5, 70))
         width = 0
         # print(f"props: {props}")
         # print(f"peaks: {peak}\n")
@@ -72,9 +92,12 @@ class Video():
 
 
 def main():
-    vid = Video("vid04.mp4", start_deep=False)
+    viddata = {"filename": "vid03.mp4", "start_deep": False,
+               "total_depth": 8, "roi": [687, 106, 117, 524]}
+    vid = Video(viddata)
+    bkgd = vid.get_bkgd()
     widths = []
-    width_indices = np.arange(0, vid.frame_count, 50)
+    width_indices = np.arange(0, vid.frame_count, 25)
     for index in width_indices:
         width = vid.analyseFrame(index, subtract_bkgd=True)
         widths.append(width)
