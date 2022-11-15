@@ -11,7 +11,8 @@ class Video():
     def __init__(self, viddata):
         self.filename = viddata["filename"]
         self.start_deep = viddata["start_deep"]
-        self.total_depth = viddata["total_depth"]
+        self.total_depth_cm = viddata["total_depth_cm"]
+        self.total_depth_pixels = viddata["total_depth_pixels"]
         self.roi = viddata["roi"]
         self.cap = cv2.VideoCapture(f"{PATH}/videos/{self.filename}")
         self.frame_count = int(self.cap.get(7))
@@ -83,30 +84,41 @@ class Video():
         x = np.linspace(0, len(profile), len(profile))
         # plt.plot(x, profile)
         peak, props = find_peaks(profile, distance=len(profile), width=(5, 70))
-        width = 0
-        # print(f"props: {props}")
-        # print(f"peaks: {peak}\n")
+        width_cm = 0
+        peak_depth_cm = 0
         if len(props['widths']) != 0:
             width = props['widths'][0]
-        return width
 
+            peak_depth_pixels = peak[0]
+            conv_factor = self.total_depth_cm / self.total_depth_pixels
+            peak_depth_cm = conv_factor * peak_depth_pixels
+
+            width_cm = conv_factor * width
+
+        return width_cm, peak_depth_cm
+        
 
 def main():
-    viddata = {"filename": "vid03.mp4", "start_deep": False,
-               "total_depth": 8, "roi": [687, 106, 117, 524]}
+    viddata = {"filename": "vid01.mp4", "start_deep": False,
+               "total_depth_cm": 20, "roi": [687, 106, 117, 524],
+               "total_depth_pixels": 563}
     vid = Video(viddata)
     bkgd = vid.get_bkgd()
     widths = []
+    depths = []
     width_indices = np.arange(0, vid.frame_count, 25)
     for index in width_indices:
-        width = vid.analyseFrame(index, subtract_bkgd=True)
-        widths.append(width)
+        width, depth_cm = vid.analyseFrame(index, subtract_bkgd=True)
+        if width != 0:
+            widths.append(width)
+            depths.append(depth_cm)
 
-    x = np.linspace(0, len(widths), len(widths))
+    # x = np.linspace(0, len(widths), len(widths))
+    # x = vid.get_depth_cm()
     # x = np.linspace(0, len(bkgd), len(bkgd))
 
     # plt.plot(x, bkgd)
-    plt.plot(x, widths)
+    plt.plot(depths, widths)
     plt.show()
 
 
