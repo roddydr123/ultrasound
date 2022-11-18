@@ -98,10 +98,17 @@ class Video():
         return width_cm, peak_depth_cm
         
 
+def plotter(x, y):
+    plt.plot(x, y)
+    plt.xlabel("Depth/cm")
+    plt.ylabel("Slice thickness/cm")
+    # plt.ylim(0.2, 1.6)
+
+
 def main():
-    viddata = {"filename": "vid01.mp4", "start_deep": False,
-               "total_depth_cm": 20, "roi": [687, 106, 117, 524],
-               "total_depth_pixels": 563}
+    viddata = {"filename": "vid10.mp4", "start_deep": True,
+               "total_depth_cm": 12, "roi": [632, 111, 232, 552],
+               "total_depth_pixels": 552}
     vid = Video(viddata)
     bkgd = vid.get_bkgd()
     widths = []
@@ -113,12 +120,11 @@ def main():
             widths.append(width)
             depths.append(depth_cm)
 
-    # x = np.linspace(0, len(widths), len(widths))
-    # x = vid.get_depth_cm()
     # x = np.linspace(0, len(bkgd), len(bkgd))
 
     # plt.plot(x, bkgd)
-    plt.plot(depths, widths)
+    # plt.plot(depths, widths)
+    plotter(depths, widths)
     plt.show()
 
 
