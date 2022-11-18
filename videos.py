@@ -95,3 +95,20 @@ class Video():
             width_cm = conv_factor * width
 
         return width_cm, peak_depth_cm
+
+    def find_ROI(self):
+        """
+        Opens a window with a frame from the video, a rectangle can be
+        dragged over the ROI. The row/column of the top left points is
+        returned along with the width of the rectangle.
+        """
+
+        self.cap.set(1, 100)
+        ret, frame = self.cap.read()
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        cv2.namedWindow("select window", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("select window", frame.shape[0], frame.shape[1])
+        r = cv2.selectROI("select window", frame)
+
+        return r
+
