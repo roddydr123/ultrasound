@@ -33,7 +33,7 @@ class Video():
         r = self.roi
         roi = greyscale[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
         profile = np.average(list(roi), 1)
-        # cv2.imwrite(PATH + "scripts/output.jpg", roi)
+        cv2.imwrite(PATH + "scripts/output.jpg", roi)
         return profile
 
     def get_bkgd(self):
