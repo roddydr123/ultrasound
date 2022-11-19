@@ -3,18 +3,20 @@ import numpy as np
 from scipy.signal import find_peaks
 
 
-PATH = "/mnt/c/users/david/Documents/uni/year-5/ultrasound/"
-
-
 class Video():
     def __init__(self, viddata):
         self.filename = viddata["filename"]
+        self.filepath = viddata["filepath"]
         self.start_deep = viddata["start_deep"]
         self.total_depth_cm = viddata["total_depth_cm"]
-        self.total_depth_pixels = viddata["total_depth_pixels"]
+        self.total_depth_pixels = viddata["roi"][3]
         self.roi = viddata["roi"]
-        self.cap = cv2.VideoCapture(f"{PATH}/videos/{self.filename}")
+        self.cap = cv2.VideoCapture(self.filepath + self.filename)
         self.frame_count = int(self.cap.get(7))
+
+    def read_info(self, filepath):
+        data = np.loadtxt(filepath, delimiter=",", skiprows=2)
+        return data
 
     def select_ROI(self, frame_index=0, roi=None):
         if roi:
@@ -33,7 +35,7 @@ class Video():
         r = self.roi
         roi = greyscale[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
         profile = np.average(list(roi), 1)
-        cv2.imwrite(PATH + "scripts/output.jpg", roi)
+        # cv2.imwrite(PATH + "scripts/output.jpg", roi)
         return profile
 
     def get_bkgd(self):
@@ -109,15 +111,7 @@ class Video():
         cv2.namedWindow("select window", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("select window", frame.shape[0], frame.shape[1])
         r = cv2.selectROI("select window", frame)
-
         return r
-
-    def reverse(self):
-        frame_list = []
-        for i in range(self.total_frames):
-            self.cap.set(1, self.total_frames - i)
-            ret, frame = self.cap.read()
-            frame_list.append(frame)
 
     def get_slice_thickness_data(self, resolution):
         widths = []
