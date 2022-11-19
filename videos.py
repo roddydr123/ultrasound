@@ -112,3 +112,46 @@ class Video():
 
         return r
 
+    def reverse(self):
+        frame_list = []
+        for i in range(self.total_frames):
+            self.cap.set(1, self.total_frames - i)
+            ret, frame = self.cap.read()
+            frame_list.append(frame)
+
+    def get_slice_thickness_data(self, resolution):
+        widths = []
+        depths = []
+        width_indices = np.arange(0, self.frame_count, resolution)
+        for index in width_indices:
+            width, depth_cm = self.analyseFrame(index, subtract_bkgd=True)
+            if width != 0:
+                widths.append(width)
+                depths.append(depth_cm)
+        widths, depths = self.trim_overlaps(widths, depths)
+        return widths, depths
+
+    def trim_overlaps(self, widths, depths):
+        width_diffs = np.sqrt(np.diff(widths)**2)
+        threshold = max(widths) / 5
+        bad_indices = []
+        for i, diff in enumerate(width_diffs):
+            if diff >= threshold:
+                bad_indices.append(i)
+        depths = np.array(depths)
+        widths = np.array(widths)
+        mask = np.ones(len(widths), dtype=bool)
+        mask[bad_indices] = False
+        depths = depths[mask]
+        widths = widths[mask]
+
+        depth_diffs = np.diff(depths)
+        bads = [0]
+        for i, diff in enumerate(depth_diffs):
+            if diff > 0:
+                bads.append(i)
+        mask2 = np.ones(len(depths), dtype=bool)
+        mask2[bads] = False
+        depths = depths[mask2]
+        widths = widths[mask2]
+        return widths, depths

@@ -16,6 +16,8 @@ def main():
                "total_depth_pixels": 552}
     vid = Video(viddata)
     bkgd = vid.get_bkgd()
+    widths, depths = vid.get_slice_thickness_data(25)
+    """
     widths = []
     depths = []
     width_indices = np.arange(0, vid.frame_count, 25)
@@ -47,7 +49,7 @@ def main():
     mask2[bads] = False
     depths = depths[mask2]
     widths = widths[mask2]
-
+    """
     # x = np.linspace(0, len(bkgd), len(bkgd))
 
     # plt.plot(x, bkgd)
