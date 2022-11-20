@@ -14,10 +14,6 @@ class Video():
         self.cap = cv2.VideoCapture(self.filepath + self.filename)
         self.frame_count = int(self.cap.get(7))
 
-    def read_info(self, filepath):
-        data = np.loadtxt(filepath, delimiter=",", skiprows=2)
-        return data
-
     def select_ROI(self, frame_index=0, roi=None):
         if roi:
             self.roi = roi

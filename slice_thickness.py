@@ -17,16 +17,16 @@ def plotter(x, y):
 
 
 def main():
-    viddata = {"filename": "vid12.mp4", "start_deep": True,
+    viddata = {"filename": "vid07.mp4", "start_deep": True,
                "total_depth_cm": 12, "roi": [632, 111, 232, 552],
                "filepath": f"{PATH}/videos/"}
     vid = Video(viddata)
     bkgd = vid.get_bkgd()
-    print(vid.read_info(f"{PATH}/videos/details.txt"))
-    # widths, depths = vid.get_slice_thickness_data(15)
+    # print(vid.read_info(f"{PATH}/videos/details.txt"))
+    widths, depths = vid.get_slice_thickness_data(25)
 
-    # plotter(depths, widths)
-    # plt.show()
+    plotter(depths, widths)
+    plt.show()
 
 
 main()
