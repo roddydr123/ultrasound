@@ -151,6 +151,6 @@ class Video():
 
         data = np.array([depths, widths]).T.tolist()
 
-        with open(filepath + self.filename[:-3] + "txt", "w+") as file:
+        with open(filepath, "w+") as file:
             for line in data:
                 file.write(f"{line[0]},{line[1]}\n")

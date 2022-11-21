@@ -21,7 +21,7 @@ def main():
     vid = Video(viddata)
     bkgd = vid.get_bkgd()
 
-    vid.save_slice_thickness_data(25, f"{PATH}scripts/analysed/")
+    vid.save_slice_thickness_data(25, f"{PATH}scripts/analysed/vid06new.txt")
 
     # widths, depths = vid.get_slice_thickness_data(25)
     # plotter(depths, widths, viddata["filename"])

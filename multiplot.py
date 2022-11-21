@@ -18,7 +18,6 @@ def main():
     for file in files_to_plot:
         with open(f"{PATH}{file}.txt") as file:
             dat = np.genfromtxt(file, delimiter=",").T.tolist()
-            print(dat)
             data.append(dat)
 
     plotter(data, f"{files_to_plot}")
