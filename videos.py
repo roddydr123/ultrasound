@@ -1,6 +1,14 @@
 import cv2
 import numpy as np
 from scipy.signal import find_peaks
+from scipy.optimize import curve_fit
+
+
+def gauss(x, a, b, c, d):
+    """
+    Define function to fit gaussian.
+    """
+    return a*np.exp(-((x - b)**2/(2*c**2))) + d
 
 
 class Video():
@@ -86,11 +94,15 @@ class Video():
         if len(props['widths']) != 0:
             width = props['widths'][0]
 
+            popt, pcov = curve_fit(gauss, x, profile, p0=[1, 1, 1, 1])
+
+            fwhm = 2.355 * popt[2]
+
             peak_depth_pixels = peak[0]
             conv_factor = self.total_depth_cm / self.total_depth_pixels
             peak_depth_cm = conv_factor * peak_depth_pixels
 
-            width_cm = conv_factor * width
+            width_cm = conv_factor * fwhm
 
         return width_cm, peak_depth_cm
 

@@ -13,11 +13,8 @@ def plotter(x, y):
     # plt.ylim(0.2, 1.6)
 
 
-
-
-
 def main():
-    viddata = {"filename": "vid07.mp4", "start_deep": True,
+    viddata = {"filename": "vid10.mp4", "start_deep": True,
                "total_depth_cm": 12, "roi": [632, 111, 232, 552],
                "filepath": f"{PATH}/videos/"}
     vid = Video(viddata)
