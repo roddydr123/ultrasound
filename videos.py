@@ -145,3 +145,12 @@ class Video():
         depths = depths[mask2]
         widths = widths[mask2]
         return widths, depths
+
+    def save_slice_thickness_data(self, resolution, filepath):
+        widths, depths = self.get_slice_thickness_data(resolution)
+
+        data = np.array([depths, widths]).T.tolist()
+
+        with open(filepath + self.filename[:-3] + "txt", "w+") as file:
+            for line in data:
+                file.write(f"{line[0]},{line[1]}\n")
