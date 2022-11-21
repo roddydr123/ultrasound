@@ -13,6 +13,7 @@ class Video():
         self.roi = viddata["roi"]
         self.cap = cv2.VideoCapture(self.filepath + self.filename)
         self.frame_count = int(self.cap.get(7))
+        self.get_bkgd()
 
     def select_ROI(self, frame_index=0, roi=None):
         if roi:

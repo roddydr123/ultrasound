@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 PATH = "/mnt/c/users/david/Documents/uni/year-5/ultrasound/scripts/analysed/"
@@ -10,10 +11,11 @@ def plotter(data, title):
     plt.xlabel("Depth/cm")
     plt.ylabel("Slice thickness/cm")
     plt.title(title)
+    plt.show()
 
 
 def main():
-    files_to_plot = ["vid06", "vid10"]
+    files_to_plot = ["vid07-highres"]
     data = []
     for file in files_to_plot:
         with open(f"{PATH}{file}.txt") as file:
