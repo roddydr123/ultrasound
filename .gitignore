@@ -2,3 +2,4 @@
 .vscode/
 cpp/
 .jpg
+__pycache__/
