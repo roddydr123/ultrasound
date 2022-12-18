@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-PATH = "/mnt/c/users/david/Documents/uni/year-5/ultrasound/"
+PATH = "/home/david/Documents/uni/year-5/ultrasound/"
 
 
 def plotter(x, y, title):
