@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-PATH = "/home/david/Documents/uni/year-5/ultrasound/"
+PATH = "/home/david/Documents/uni/year-5/ultrasound/scripts/analysed/"
 
 
 def plotter(data, title):
@@ -15,7 +15,7 @@ def plotter(data, title):
 
 
 def main():
-    files_to_plot = ["vid07-highres"]
+    files_to_plot = ["vid07"]
     data = []
     for file in files_to_plot:
         with open(f"{PATH}{file}.txt") as file:
