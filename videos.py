@@ -1,17 +1,18 @@
 import cv2
 import numpy as np
 from scipy.signal import find_peaks
+import csv
 
 
 class Video():
     def __init__(self, viddata):
-        self.filename = viddata["filename"]
+        self.filenumber = viddata["filenumber"]
+        self.filename = f"vid{self.filenumber}.mp4"
         self.filepath = viddata["filepath"]
-        self.start_deep = viddata["start_deep"]
-        self.total_depth_cm = viddata["total_depth_cm"]
+        self.start_deep = True
+        self.total_depth_cm = self.fetch_video_details()
         self.total_depth_pixels = viddata["roi"][3]
         self.roi = viddata["roi"]
-        self.filenumber = viddata["filenumber"]
         self.cap = cv2.VideoCapture(self.filepath + self.filename)
         self.frame_count = int(self.cap.get(7))
         self.get_bkgd()
@@ -161,10 +162,8 @@ class Video():
     def fetch_video_details(self):
         """Retrieve the depth from details.txt"""
         with open(f"{self.filepath}/details.txt", "r") as file:
-            details = file.readlines()
-
-        for line in details:
-            if line[0] == self.filenumber:
-                tdepth = line[2]
-        
-        return tdepth
+            for line in csv.reader(file, delimiter="\t"):
+                if line[0] == self.filenumber:
+                    tdepth = line[2]
+                    break
+        return float(tdepth)
