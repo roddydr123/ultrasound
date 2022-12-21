@@ -17,14 +17,10 @@ def plotter(x, y, title):
 def main():
     viddata = {"filename": "vid07.mp4", "start_deep": True,
                "total_depth_cm": 12, "roi": [632, 111, 232, 552],
-               "filepath": f"{PATH}videos/"}
+               "filepath": f"{PATH}videos/", "filenumber": "07"}
     vid = Video(viddata)
 
     vid.save_slice_thickness_data(5, f"{PATH}scripts/analysed/vid07.txt")
-
-    # widths, depths = vid.get_slice_thickness_data(25)
-    # plotter(depths, widths, viddata["filename"])
-    # plt.show()
 
 
 main()

@@ -11,6 +11,7 @@ class Video():
         self.total_depth_cm = viddata["total_depth_cm"]
         self.total_depth_pixels = viddata["roi"][3]
         self.roi = viddata["roi"]
+        self.filenumber = viddata["filenumber"]
         self.cap = cv2.VideoCapture(self.filepath + self.filename)
         self.frame_count = int(self.cap.get(7))
         self.get_bkgd()
@@ -155,3 +156,15 @@ class Video():
         with open(filepath, "w+") as file:
             for line in data:
                 file.write(f"{line[0]},{line[1]}\n")
+
+    
+    def fetch_video_details(self):
+        """Retrieve the depth from details.txt"""
+        with open(f"{self.filepath}/details.txt", "r") as file:
+            details = file.readlines()
+
+        for line in details:
+            if line[0] == self.filenumber:
+                tdepth = line[2]
+        
+        return tdepth
