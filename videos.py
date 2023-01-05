@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from scipy.signal import find_peaks
 import csv
+from tqdm import tqdm
 
 
 class Video():
@@ -10,10 +11,13 @@ class Video():
         self.filename = f"vid{self.filenumber}.mp4"
         self.filepath = viddata["filepath"]
         self.start_deep = True
-        self.total_depth_cm = self.fetch_video_details()
+        self.total_depth_cm, ROI_list = self.fetch_video_details()
         self.cap = cv2.VideoCapture(self.filepath + self.filename)
-        self.roi = viddata["roi"]
-        self.total_depth_pixels = viddata["roi"][3]
+        try:
+            self.roi = viddata["roi"]
+        except KeyError:
+            self.roi = ROI_list
+        self.total_depth_pixels = self.roi[3]
         self.frame_count = int(self.cap.get(7))
         self.get_bkgd()
  
@@ -79,7 +83,7 @@ class Video():
         widths = []
         depths = []
         width_indices = np.arange(0, self.frame_count, resolution)
-        for index in width_indices:
+        for index in tqdm(width_indices):
             width, depth_cm = self.analyseFrame(index, subtract_bkgd=True)
             if width != 0:
                 widths.append(width)
@@ -127,6 +131,7 @@ class Video():
         with open(f"{self.filepath}/details.txt", "r") as file:
             for line in csv.reader(file, delimiter="\t"):
                 if line[0] == self.filenumber:
-                    tdepth = line[2]
+                    tdepth = float(line[2])
+                    ROI_tuple = line[5].split(sep=",")
                     break
-        return float(tdepth)
+        return tdepth, ROI_tuple
