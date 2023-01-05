@@ -1,9 +1,10 @@
 import cv2
+import sys
 
 
-PATH = "/mnt/c/users/david/Documents/uni/year-5/ultrasound/"
+PATH = "/home/david/Documents/uni/year-5/ultrasound/"
 
-cap = cv2.VideoCapture(PATH + "videos/vid03.mp4")
+cap = cv2.VideoCapture(f"{PATH}videos/{sys.argv[1]}.mp4")
 total_frames = int(cap.get(7))
 # cap.set(1, total_frames - 500)
 cap.set(1, 100)

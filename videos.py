@@ -11,25 +11,17 @@ class Video():
         self.filepath = viddata["filepath"]
         self.start_deep = True
         self.total_depth_cm = self.fetch_video_details()
-        self.total_depth_pixels = viddata["roi"][3]
-        self.roi = viddata["roi"]
         self.cap = cv2.VideoCapture(self.filepath + self.filename)
+        self.roi = viddata["roi"]
+        self.total_depth_pixels = viddata["roi"][3]
         self.frame_count = int(self.cap.get(7))
         self.get_bkgd()
-
-    def select_ROI(self, frame_index=0, roi=None):
-        if roi:
-            self.roi = roi
-        else:
-            self.cap.set(1, frame_index)
-            ret, frame = self.cap.read()
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            cv2.namedWindow("select window", cv2.WINDOW_NORMAL)
-            cv2.resizeWindow("select window", frame.shape[0], frame.shape[1])
-            self.roi = cv2.selectROI("select window", frame)
-        return self.roi
  
     def get_profile(self, frame):
+        """
+        Extracts the pixel data from the ROI and flattens it to make a
+        slice thickness graph.
+        """
         greyscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         r = self.roi
         roi = greyscale[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
@@ -38,30 +30,17 @@ class Video():
         return profile
 
     def get_bkgd(self):
-        if self.start_deep is True:
-            self.cap.set(1, self.frame_count - 10)
-            ret, frame = self.cap.read()
-            profile = self.get_profile(frame)
-            end_bkgd = profile[-int(len(profile) / 2):]
+        self.cap.set(1, self.frame_count - 10)
+        ret, frame = self.cap.read()
+        profile = self.get_profile(frame)
+        end_bkgd = profile[-int(len(profile) / 2):]
 
-            self.cap.set(1, 10)
-            ret, frame = self.cap.read()
-            profile = self.get_profile(frame)
-            start_bkgd = profile[:int(len(profile) / 2)]
+        self.cap.set(1, 10)
+        ret, frame = self.cap.read()
+        profile = self.get_profile(frame)
+        start_bkgd = profile[:int(len(profile) / 2)]
 
-            bkgd = np.concatenate((start_bkgd, end_bkgd))
-        else:
-            self.cap.set(1, 10)
-            ret, frame = self.cap.read()
-            profile = self.get_profile(frame)
-            start_bkgd = profile[-int(len(profile) / 2):]
-
-            self.cap.set(1, self.frame_count - 10)
-            ret, frame = self.cap.read()
-            profile = self.get_profile(frame)
-            end_bkgd = profile[:int(len(profile) / 2)]
-
-            bkgd = np.concatenate((start_bkgd, end_bkgd))
+        bkgd = np.concatenate((start_bkgd, end_bkgd))
 
         if np.average(bkgd) < 2:
             # to avoid joining errors between the two bkgds
@@ -82,7 +61,6 @@ class Video():
         if subtract_bkgd is True:
             profile -= self.bkgd
         x = np.linspace(0, len(profile), len(profile))
-        # plt.plot(x, profile)
         peak, props = find_peaks(profile, distance=len(profile), width=(5, 70))
         width_cm = 0
         peak_depth_cm = 0
@@ -96,21 +74,6 @@ class Video():
             width_cm = conv_factor * width
 
         return width_cm, peak_depth_cm
-
-    def find_ROI(self):
-        """
-        Opens a window with a frame from the video, a rectangle can be
-        dragged over the ROI. The row/column of the top left points is
-        returned along with the width of the rectangle.
-        """
-
-        self.cap.set(1, 100)
-        ret, frame = self.cap.read()
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        cv2.namedWindow("select window", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("select window", frame.shape[0], frame.shape[1])
-        r = cv2.selectROI("select window", frame)
-        return r
 
     def get_slice_thickness_data(self, resolution):
         widths = []
