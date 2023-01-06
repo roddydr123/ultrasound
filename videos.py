@@ -9,6 +9,7 @@ class Video():
     def __init__(self, viddata):
         self.filenumber = viddata["filenumber"]
         self.filename = f"vid{self.filenumber}.mp4"
+        print(f"Analysing {self.filename}")
         self.filepath = viddata["filepath"]
         self.start_deep = True
         self.total_depth_cm, ROI_list = self.fetch_video_details()
@@ -64,7 +65,9 @@ class Video():
         profile = self.get_profile(frame)
         if subtract_bkgd is True:
             profile -= self.bkgd
-        x = np.linspace(0, len(profile), len(profile))
+
+        # exclude very start and very end from peak finder since these often have reflections.
+        # maybe implement later
         peak, props = find_peaks(profile, distance=len(profile), width=(5, 70))
         width_cm = 0
         peak_depth_cm = 0
@@ -133,5 +136,6 @@ class Video():
                 if line[0] == self.filenumber:
                     tdepth = float(line[2])
                     ROI_tuple = line[5].split(sep=",")
+                    ROI_list = list(map(int, ROI_tuple))
                     break
-        return tdepth, ROI_tuple
+        return tdepth, ROI_list

@@ -15,8 +15,8 @@ def plotter(x, y, title):
 
 
 def main():
-    viddata = {"roi": [632, 111, 232, 552],
-               "filepath": f"{PATH}videos/", "filenumber": "07"}
+    viddata = {
+               "filepath": f"{PATH}videos/", "filenumber": "19"}
     vid = Video(viddata)
 
     vid.save_slice_thickness_data(5, f"{PATH}scripts/analysed/vid{viddata['filenumber']}.txt")
