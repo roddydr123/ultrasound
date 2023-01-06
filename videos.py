@@ -67,14 +67,19 @@ class Video():
             profile -= self.bkgd
 
         # exclude very start and very end from peak finder since these often have reflections.
-        # maybe implement later
-        peak, props = find_peaks(profile, distance=len(profile), width=(5, 70))
+        # works by cutting 20 pixels from the top and bottom of the ROI before finding peaks, then
+        # add 20 to all the peak locations.
+        pixels_to_trim = 20
+        trimmed_profile = profile[pixels_to_trim:-pixels_to_trim]
+
+        peak, props = find_peaks(trimmed_profile, distance=len(profile), width=(5, 70))
         width_cm = 0
         peak_depth_cm = 0
         if len(props['widths']) != 0:
             width = props['widths'][0]
 
-            peak_depth_pixels = peak[0]
+            # add back in the pixels we trimmed off to maintain accurate depth.
+            peak_depth_pixels = peak[0] + pixels_to_trim
             conv_factor = self.total_depth_cm / self.total_depth_pixels
             peak_depth_cm = conv_factor * peak_depth_pixels
 
