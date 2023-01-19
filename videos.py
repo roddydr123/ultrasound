@@ -15,6 +15,8 @@ class Video():
         self.total_depth_cm, ROI_list = self.fetch_video_details()
         self.cap = cv2.VideoCapture(self.filepath + self.filename)
         try:
+            # get the ROI passed as an argument, but if there isn't one
+            # then get it from file.
             self.roi = viddata["roi"]
         except KeyError:
             self.roi = ROI_list
@@ -59,12 +61,14 @@ class Video():
         self.bkgd = bkgd
         return bkgd
 
-    def analyseFrame(self, index, subtract_bkgd=True):
+    def analyseFrame(self, index):
         self.cap.set(1, index)
         ret, frame = self.cap.read()
+        # skip frames which are not read in properly.
+        if frame is None:
+            return 0, 0
         profile = self.get_profile(frame)
-        if subtract_bkgd is True:
-            profile -= self.bkgd
+        profile -= self.bkgd
 
         # exclude very start and very end from peak finder since these often have reflections.
         # works by cutting 20 pixels from the top and bottom of the ROI before finding peaks, then
@@ -92,7 +96,7 @@ class Video():
         depths = []
         width_indices = np.arange(0, self.frame_count, resolution)
         for index in tqdm(width_indices):
-            width, depth_cm = self.analyseFrame(index, subtract_bkgd=True)
+            width, depth_cm = self.analyseFrame(index)
             if width != 0:
                 widths.append(width)
                 depths.append(depth_cm)
