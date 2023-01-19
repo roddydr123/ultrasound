@@ -7,11 +7,11 @@ PATH = "/home/david/Documents/uni/year-5/ultrasound/scripts/analysed/"
 
 
 def plotter(data, title):
-    for dataset in data:
-        plt.plot(dataset[0], dataset[1])
+    for i, dataset in enumerate(data):
+        plt.plot(dataset[0], dataset[1], label=title[i])
     plt.xlabel("Depth/cm")
     plt.ylabel("Slice thickness/cm")
-    plt.title(title)
+    plt.legend()
     plt.show()
 
 
@@ -23,7 +23,7 @@ def main():
             dat = np.genfromtxt(file, delimiter=",").T.tolist()
             data.append(dat)
 
-    plotter(data, f"{files_to_plot}")
+    plotter(data, files_to_plot)
 
 
 main()
