@@ -12,7 +12,9 @@ class Video():
         print(f"Analysing {self.filename}")
         self.filepath = viddata["filepath"]
         self.start_deep = True
-        self.total_depth_cm, ROI_list = self.fetch_video_details()
+        deets = fetch_video_details(self.filepath, self.filenumber)
+        self.total_depth_cm = deets["tdepth"]
+        ROI_list = deets["ROI"]
         self.cap = cv2.VideoCapture(self.filepath + self.filename)
         try:
             # get the ROI passed as an argument, but if there isn't one
@@ -33,7 +35,6 @@ class Video():
         r = self.roi
         roi = greyscale[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
         profile = np.average(list(roi), 1)
-        # cv2.imwrite(PATH + "scripts/output.jpg", roi)
         return profile
 
     def get_bkgd(self):
@@ -97,9 +98,10 @@ class Video():
         width_indices = np.arange(0, self.frame_count, resolution)
         for index in tqdm(width_indices):
             width, depth_cm = self.analyseFrame(index)
-            if width != 0:
-                widths.append(width)
-                depths.append(depth_cm)
+            if width == 0:  # check if the peak was found successfully
+                continue
+            widths.append(width)
+            depths.append(depth_cm)
         widths, depths = self.trim_overlaps(widths, depths)
         return widths, depths
 
@@ -129,6 +131,7 @@ class Video():
         return widths, depths
 
     def save_slice_thickness_data(self, resolution, filepath):
+        print(f"--> {filepath}")
         widths, depths = self.get_slice_thickness_data(resolution)
 
         data = np.array([depths, widths]).T.tolist()
@@ -137,14 +140,18 @@ class Video():
             for line in data:
                 file.write(f"{line[0]},{line[1]}\n")
 
-    
-    def fetch_video_details(self):
+
+def fetch_video_details(filepath, filenumber):
         """Retrieve the depth from details.txt"""
-        with open(f"{self.filepath}/details.txt", "r") as file:
+        with open(f"{filepath}/details.txt", "r") as file:
             for line in csv.reader(file, delimiter="\t"):
-                if line[0] == self.filenumber:
+                if line[0] == filenumber:
                     tdepth = float(line[2])
                     ROI_tuple = line[5].split(sep=",")
                     ROI_list = list(map(int, ROI_tuple))
+                    fdepth_tuple = line[4].split(sep=",")
+                    fdepth_list = list(map(float, fdepth_tuple))
                     break
-        return tdepth, ROI_list
+        return {"tdepth": tdepth,
+                "ROI": ROI_list,
+                "fdepth": fdepth_list}
