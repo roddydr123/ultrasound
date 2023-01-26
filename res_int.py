@@ -24,7 +24,16 @@ from scipy.interpolate import UnivariateSpline as us
 # lengths = np.array([0.0, 0.0, 3.75, 7.6, 7.75, 10.1, 15.05, 17.5, 17.5, 17.5, 17.5, 17.5, 17.5])    # C15 st videos in notes
 # lengths = np.array([0.0, 0.0, 3.75, 7.6, 7.75, 10.1, 15.05, 19.8, 19.8, 19.8, 19.8, 19.8, 19.8])    # adjusted C15
 # lengths = np.array([0.0, 3.1, 5.8, 6.9, 7.7, 10, 12.7, 13, 13, 13, 13, 13, 13]) # 9L repeat st videos in notes
-lengths = np.array([0.0, 3.1, 5.8, 6.9, 7.7, 10, 12.7, 19.8, 19.8, 19.8, 19.8, 19.8, 19.8]) # adjusted 9L repeat
+# lengths = np.array([0.0, 3.1, 5.8, 6.9, 7.7, 10, 12.7, 19.8, 19.8, 19.8, 19.8, 19.8, 19.8]) # adjusted 9L repeat
+
+"""Visualisation lengths from slice thickness videos in mm"""
+# lengths = [0,0,0,0,0,0,0,10,38,64,96,96,185]    # 9L-D
+# lengths = [0,0,0,0,0,0,18,22,42,58,94,95,102]   # ML6-15
+# lengths = [0,0,0,0,0,18,21,32,39,61,65,65,70]   # 14L5
+# lengths = [0,0,0,0,0,0,6.5,16,36,54,78,108,138] # 9L4
+# lengths = [0,0,0,0,0,0,0,0,11,40,111,114,198]   # C1-5
+# lengths = [0,0,0,0,0,0,0,16,36,67,84,84,180]    # 9L-D repeat
+# lengths = [0,0,0,0,0,0,24,25,56,65,65,65,72]    # 18L6
 
 """Visualisation lengths from NHS data spreadsheet or lab folder in mm"""
 # lengths = np.array([0.0, 2.9, 26.0, 40.3, 55.0, 71.0, 81.3, 89.7, 93.4, 94.6, 97.2, 98.6]) / 10   # NHS data for ML6-15 31/03/15
@@ -33,20 +42,21 @@ lengths = np.array([0.0, 3.1, 5.8, 6.9, 7.7, 10, 12.7, 19.8, 19.8, 19.8, 19.8, 1
 # lengths = np.array([0.0, 2.0, 10.8, 22.7, 39.6, 44.9, 57.0, 65.8, 69.3, 72.5, 75.8, 76.8]) / 10 # NHS data 14L5 21/07/10
 # lengths = np.array([0.0, 0.0, 6.4, 24.4, 43.5, 58.5, 83.9, 97.7, 132.6, 137.9, 137.9, 137.9]) / 10  # NHS data 9L4 lab folder
 # lengths = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 41.0, 73.6, 121.0, 169.5, 197.1, 203.1, 221.5]) / 10   # NHS data C1-5 lab folder
+lengths = [0,2.2,12.8,19.1,28.7,39.7,60.9,64.9,65.5,66.6,65.9,65.2] # NHS data in folder 18L6
 
 
 """Pipe/slice thickness diameters in mm"""
 # diameters = np.array([0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])
-diameters = np.array([0.15, 0.3, 0.4, 0.6, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])    # my custom diameters for ST
+# diameters = [0.15, 0.3, 0.4, 0.6, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf]    # my custom diameters for ST
 # diameters = np.array([0.05, 0.3, 0.4, 0.6, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])    # my custom diameters for 14L5 ST
 # diameters = np.array([0.35, 0.42, 0.56, 0.70, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 7.9, np.inf])   # NHS data teams spreadsheet
-# diameters = np.array([0.3, 0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])   # NHS data lab folder
+diameters = np.array([0.3, 0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])   # NHS data lab folder
 
-diameters = diameters[::-1] / np.sqrt(np.cos(np.deg2rad(40))) # convert to effective diameter and reverse
+diameters = np.array(diameters)[::-1] / np.sqrt(np.cos(np.deg2rad(40))) # convert to effective diameter and reverse
 inverse_diameters = 1 / diameters
-lengths = lengths[::-1] * 10   # convert to mm
+lengths = np.array(lengths)[::-1]
 
-reference_x_coord = 0.02
+reference_x_coord = 0.00002
 
 
 class Line():
