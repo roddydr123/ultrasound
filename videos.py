@@ -13,7 +13,7 @@ class Video():
         self.filepath = viddata["filepath"]
         self.start_deep = True
         deets = fetch_video_details(self.filepath, self.filenumber)
-        self.total_depth_cm = deets["tdepth"]
+        self.total_depth_cm = deets["total_depth"]
         ROI_list = deets["ROI"]
         self.cap = cv2.VideoCapture(self.filepath + self.filename)
         try:
@@ -147,11 +147,20 @@ def fetch_video_details(filepath, filenumber):
             for line in csv.reader(file, delimiter="\t"):
                 if line[0] == filenumber:
                     tdepth = float(line[2])
+
                     ROI_tuple = line[5].split(sep=",")
                     ROI_list = list(map(int, ROI_tuple))
+
                     fdepth_tuple = line[4].split(sep=",")
                     fdepth_list = list(map(float, fdepth_tuple))
+
+                    probe = line[1]
+                    
+                    freq = line[3]
                     break
-        return {"tdepth": tdepth,
+        return {"video_number": filenumber,
+                "total_depth": tdepth,
                 "ROI": ROI_list,
-                "fdepth": fdepth_list}
+                "focus_depth": fdepth_list,
+                "probe": probe,
+                "frequency": freq}
