@@ -90,6 +90,11 @@ class Video():
 
             width_cm = conv_factor * width
 
+        # speed of sound conversion factor
+        scf = 0.94
+        width_cm *= scf
+        peak_depth_cm *= scf
+
         return width_cm, peak_depth_cm
 
     def get_slice_thickness_data(self, resolution):
