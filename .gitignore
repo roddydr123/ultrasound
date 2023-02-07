@@ -3,6 +3,5 @@
 cpp/
 .jpg
 __pycache__/
-analysed/
 __pycache__/videos.cpython-38.pyc
-.txt
+env/
