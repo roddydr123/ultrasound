@@ -12,9 +12,11 @@ PATH_TO_DETAILS = "/home/david/Documents/uni/year-5/ultrasound/videos/"
 def plotter(data, title, details_list):
     fig, ax = plt.subplots(figsize=(14, 10))
     for i, dataset in enumerate(data):
+        # order data to be deeper monotonically.
         ind = np.argsort(dataset[0])
         x = np.array(dataset[0])[ind]
         y = np.array(dataset[1])[ind]
+        # smooth the line and plot it.
         ax.plot(x, gf1d(list(map(lambda x: x * 10, y)), 4), label=details_list[i])
     ax.set_xlabel("Depth/cm")
     ax.set_ylabel("Slice thickness/mm")
