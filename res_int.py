@@ -34,6 +34,12 @@ from scipy.interpolate import UnivariateSpline as us
 # lengths = [0,0,0,0,0,0,0,0,11,40,111,114,198]   # C1-5
 # lengths = [0,0,0,0,0,0,0,16,36,67,84,84,180]    # 9L-D repeat
 # lengths = [0,0,0,0,0,0,24,25,56,65,65,65,72]    # 18L6
+# lengths = [0,0,0,0,0,0,0,20,31,52,88,88,95]     # ML6-15 repeat
+# lengths = [0,0,0,0,0,14,18,33,36,63,63,63,68]   # 14L5 repeat
+# lengths = [0,0,0,0,0,0,0,0,0,12,58,127,160]     # 4C1
+# lengths = [0,0,0,0,0,11,26,29,57,57,57,57,62]   # 18L6 different probe
+# lengths = [0,0,0,0,0,0,7,43,46,61,69,125,134]   # 9L4 different probe
+# lengths = [0,0,0,0,0,0,0,0,1,82,152,152,168]      # 6C1
 
 """Visualisation lengths from NHS data spreadsheet or lab folder in mm"""
 # lengths = np.array([0.0, 2.9, 26.0, 40.3, 55.0, 71.0, 81.3, 89.7, 93.4, 94.6, 97.2, 98.6]) / 10   # NHS data for ML6-15 31/03/15
@@ -42,7 +48,8 @@ from scipy.interpolate import UnivariateSpline as us
 # lengths = np.array([0.0, 2.0, 10.8, 22.7, 39.6, 44.9, 57.0, 65.8, 69.3, 72.5, 75.8, 76.8]) / 10 # NHS data 14L5 21/07/10
 # lengths = np.array([0.0, 0.0, 6.4, 24.4, 43.5, 58.5, 83.9, 97.7, 132.6, 137.9, 137.9, 137.9]) / 10  # NHS data 9L4 lab folder
 # lengths = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 41.0, 73.6, 121.0, 169.5, 197.1, 203.1, 221.5]) / 10   # NHS data C1-5 lab folder
-lengths = [0,2.2,12.8,19.1,28.7,39.7,60.9,64.9,65.5,66.6,65.9,65.2] # NHS data in folder 18L6
+# lengths = [0,2.2,12.8,19.1,28.7,39.7,60.9,64.9,65.5,66.6,65.9,65.2] # NHS data in folder 18L6
+lengths = [0,0,0,0,0,4.6,47.1,117.2,175.6,195,200.5,215.8]  # NHS data in folder 6C1
 
 
 """Pipe/slice thickness diameters in mm"""
