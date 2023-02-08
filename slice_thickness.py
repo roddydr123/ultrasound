@@ -228,6 +228,11 @@ def main():
         get_slice_thickness(sys.argv[2])
     elif sys.argv[1] == "L":
         extract_Ls(sys.argv[2], sys.argv[3])
+    elif sys.argv[1] == "all":
+        videos = np.arange(1, 90, 1)
+        for video in videos:
+            n = str(video).zfill(2)
+            get_slice_thickness(n)
 
 
 if __name__=="__main__":

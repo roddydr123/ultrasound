@@ -6,7 +6,7 @@ from videos import fetch_video_details
 from slice_thickness import process_raw_video_data
 
 
-PATH = "/home/david/Documents/uni/year-5/ultrasound/scripts/analysed/"
+PATH = "/home/david/Documents/uni/year-5/ultrasound/scripts/analysed/gen2"
 PATH_TO_DETAILS = "/home/david/Documents/uni/year-5/ultrasound/videos/"
 
 
