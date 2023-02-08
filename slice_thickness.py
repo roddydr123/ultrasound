@@ -1,21 +1,22 @@
 from videos import Video
 import numpy as np
-from scipy.interpolate import UnivariateSpline as us
+# from scipy.interpolate import UnivariateSpline as us
 import matplotlib.pyplot as plt
 from itertools import pairwise
 from scipy.ndimage import gaussian_filter1d as gf1d
 from scipy.signal import find_peaks
+import sys
 
 
 PATH = "/home/david/Documents/uni/year-5/ultrasound/"
 
 
-def get_slice_thickness():
+def get_slice_thickness(number):
     viddata = {
-               "filepath": f"{PATH}videos/", "filenumber": "54"}
+               "filepath": f"{PATH}videos/", "filenumber": f"{number}"}
     vid = Video(viddata)
 
-    vid.save_slice_thickness_data(15, f"{PATH}scripts/analysed/testvid{viddata['filenumber']}.txt")
+    vid.save_slice_thickness_data(15, f"{PATH}scripts/analysed/gen2/vid{viddata['filenumber']}.txt")
 
 
 
@@ -57,20 +58,20 @@ def trim_end(reduced_depths, reduced_st):
 
 
 
-def extract_Ls(smoothing_factor=3, threshold=20):
+def extract_Ls(required_videos, pipe_diameters, smoothing_factor=3, threshold=20):
     """Takes in videos for a probe and finds the depth range for which a series of
     slice thicknesses are larger.
     """
 
-    required_videos = [45]
+    # required_videos = [45, 54]
     # range of slice thicknesses to find L for.
-    pipe_diameters = [1,4,5,5.9,6] # np.linspace(2, 8, 1)
+    # pipe_diameters = [1,4,5,5.9,6] # np.linspace(2, 8, 1)
 
     vid_arrays = []
     LCPs = []
     # load in slice thickness plot data
     for vid_number in required_videos:
-        vid_path = f"{PATH}scripts/analysed/testvid{vid_number}.txt"
+        vid_path = f"{PATH}scripts/analysed/vid{vid_number}.txt"
         dataset = np.genfromtxt(vid_path, dtype=float, delimiter=",").T
 
         # sort and convert to mm
@@ -121,10 +122,13 @@ def extract_Ls(smoothing_factor=3, threshold=20):
 
         # print(dead_zone, LCP)
 
+    """
+    The following section loops through all the videos and diameters to find L for each diameter
+    from all the videos. It stores the results in a dictionary called L_dict where the keys are
+    the diameters.
+    """
     shallow_dict = {}
     deep_dict = {}
-
-    L_dict = {}
 
     for diameter in pipe_diameters:
         # dictionaries to store the intersection points for each diameter from all videos
@@ -171,6 +175,7 @@ def extract_Ls(smoothing_factor=3, threshold=20):
                 print(f"curve intersects y={diameter} at x={depth_vals}")
 
 
+    L_dict = {}
     for diameter in pipe_diameters:
         # pipe not seen
         if len(deep_dict[diameter]) == 0 and len(shallow_dict[diameter]) == 0:
@@ -180,15 +185,16 @@ def extract_Ls(smoothing_factor=3, threshold=20):
             L_dict[diameter] = np.max(deep_dict[diameter]) - np.min(shallow_dict[diameter])
 
     
-
-
-    print(L_dict)
-
-    plt.plot(reduced_depths, reduced_st)
-    plt.scatter(depths, slice_thicknesses)
-    plt.show()
+    return L_dict
     
 
 
-# get_slice_thickness()
-extract_Ls()
+def main():
+    if sys.argv[1] == "ST":
+        get_slice_thickness(sys.argv[2])
+    elif sys.argv[1] == "L":
+        extract_Ls(sys.argv[2], sys.argv[3])
+
+
+if __name__=="__main__":
+    main()
