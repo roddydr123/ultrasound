@@ -26,6 +26,8 @@ class Video():
         self.frame_count = int(self.cap.get(7))
         self.get_bkgd()
  
+
+
     def get_profile(self, frame):
         """
         Extracts the pixel data from the ROI and flattens it to make a
@@ -36,6 +38,8 @@ class Video():
         roi = greyscale[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
         profile = np.average(list(roi), 1)
         return profile
+
+
 
     def get_bkgd(self):
         self.cap.set(1, self.frame_count - 10)
@@ -62,6 +66,8 @@ class Video():
         self.bkgd = bkgd
         return bkgd
 
+
+
     def analyseFrame(self, index):
         self.cap.set(1, index)
         ret, frame = self.cap.read()
@@ -77,7 +83,14 @@ class Video():
         pixels_to_trim = 20
         trimmed_profile = profile[pixels_to_trim:-pixels_to_trim]
 
-        peak, props = find_peaks(trimmed_profile, distance=len(profile), width=(5, 70))
+        # get the height of the peak
+        peak, props = find_peaks(trimmed_profile, distance=len(profile), width=(5, 70), height=(0, 5000))
+        if len(props["peak_heights"]) != 0:
+            peak_height = float(props["peak_heights"])
+        else:
+            peak_height = 0
+
+
         width_cm = 0
         peak_depth_cm = 0
         if len(props['widths']) != 0:
@@ -95,22 +108,28 @@ class Video():
         width_cm *= scf
         peak_depth_cm *= scf
 
-        return width_cm, peak_depth_cm
+        return width_cm, peak_depth_cm, peak_height
+
+
 
     def get_slice_thickness_data(self, resolution):
         widths = []
         depths = []
+        peak_heights = []
         width_indices = np.arange(0, self.frame_count, resolution)
         for index in tqdm(width_indices):
-            width, depth_cm = self.analyseFrame(index)
+            width, depth_cm, peak_height = self.analyseFrame(index)
             if width == 0:  # check if the peak was found successfully
                 continue
             widths.append(width)
             depths.append(depth_cm)
-        widths, depths = self.trim_overlaps(widths, depths)
-        return widths, depths
+            peak_heights.append(peak_height)
+        widths, depths, heights = self.trim_overlaps(widths, depths, peak_heights)
+        return widths, depths, heights
 
-    def trim_overlaps(self, widths, depths):
+
+
+    def trim_overlaps(self, widths, depths, heights):
         width_diffs = np.sqrt(np.diff(widths)**2)
         threshold = max(widths) / 5
         bad_indices = []
@@ -119,10 +138,12 @@ class Video():
                 bad_indices.append(i)
         depths = np.array(depths)
         widths = np.array(widths)
+        heights = np.array(heights)
         mask = np.ones(len(widths), dtype=bool)
         mask[bad_indices] = False
         depths = depths[mask]
         widths = widths[mask]
+        heights = heights[mask]
 
         depth_diffs = np.diff(depths)
         bads = [0]
@@ -133,17 +154,21 @@ class Video():
         mask2[bads] = False
         depths = depths[mask2]
         widths = widths[mask2]
-        return widths, depths
+        heights = heights[mask2]
+        return widths, depths, heights
+
+
 
     def save_slice_thickness_data(self, resolution, filepath):
         print(f"--> {filepath}")
-        widths, depths = self.get_slice_thickness_data(resolution)
+        widths, depths, heights = self.get_slice_thickness_data(resolution)
 
-        data = np.array([depths, widths]).T.tolist()
+        data = np.array([depths, widths, heights]).T.tolist()
 
         with open(filepath, "w+") as file:
-            for line in data:
-                file.write(f"{line[0]},{line[1]}\n")
+            for i, line in enumerate(data):
+                file.write(f"{line[0]},{line[1]},{line[2]}\n")
+
 
 
 def fetch_video_details(filepath, filenumber):
