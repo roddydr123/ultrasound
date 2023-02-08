@@ -16,7 +16,7 @@ def get_slice_thickness(number):
                "filepath": f"{PATH}videos/", "filenumber": f"{number}"}
     vid = Video(viddata)
 
-    vid.save_slice_thickness_data(15, f"{PATH}scripts/analysed/gen2/vid{viddata['filenumber']}.txt")
+    vid.save_slice_thickness_data(5, f"{PATH}scripts/analysed/gen2/vid{viddata['filenumber']}.txt")
 
 
 
@@ -58,69 +58,87 @@ def trim_end(reduced_depths, reduced_st):
 
 
 
-def extract_Ls(required_videos, pipe_diameters, smoothing_factor=3, threshold=20):
+def process_raw_video_data(dataset, threshold, smoothing_factor):
+    """Takes raw data extracted from a slice thickness video and 
+    processes it.
+
+    Args:
+        dataset (np.array): data from the video, should be 2 by data length. Data in mm.
+        threshold (float): Set LCP as depth when pixel value drops below this threshold.
+        smoothing_factor (int): choose how much to smooth the outputted STs by.
+
+    Returns:
+        list: [reduced_depths, reduced_st, dead zone, LCP] - the processed video data.
+    """
+    # sort and convert to mm
+    ind = np.argsort(dataset[0])
+    depths = np.array(dataset[0])[ind]
+    slice_thicknesses = np.array(dataset[1])[ind]
+    pixel_values = np.array(dataset[2])[ind]
+
+    # calculate low contrast penetration from pixel values
+    index = None
+    for i, number in enumerate(pixel_values):
+        # start from half way through so nothing at start is picked up
+        if i < len(pixel_values) / 2:
+            continue
+        if number < threshold:
+            index = i
+            break
+    
+    # if pixel value falls below threshold, that depths is the LCP. If it does not,
+    # LCP is the deepest point recorded.
+    if index is not None:
+        LCP = depths[index - 1]
+    else:
+        LCP = depths[-1]
+
+    # average slice thicknesses recorded for the same depth.
+    reduced_st = []
+    reduced_depths, indices = np.unique(depths, return_index=True)
+    pairs = list(pairwise(indices))
+    for pair in pairs:
+        reduced_st.append(np.median(slice_thicknesses[pair[0]:pair[1]]))
+    # pairwise misses out the last section so add it back in.
+    reduced_st.append(np.median(slice_thicknesses[list(pairs)[-1][1]:]))
+
+    # presmooth
+    reduced_st = gf1d(reduced_st, smoothing_factor)
+
+    # trim points before first maximum
+    reduced_depths, reduced_st = trim_start(reduced_depths, reduced_st)
+
+    # trim points after final maximum
+    reduced_depths, reduced_st = trim_end(reduced_depths, reduced_st)
+
+    # smooth
+    # reduced_st = gf1d(reduced_st, smoothing_factor)
+
+    dead_zone = depths[0]
+
+    return reduced_depths, reduced_st, dead_zone, LCP
+
+
+
+def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
     """Takes in videos for a probe and finds the depth range for which a series of
     slice thicknesses are larger.
     """
-
-    # required_videos = [45, 54]
-    # range of slice thicknesses to find L for.
-    # pipe_diameters = [1,4,5,5.9,6] # np.linspace(2, 8, 1)
 
     vid_arrays = []
     LCPs = []
     # load in slice thickness plot data
     for vid_number in required_videos:
-        vid_path = f"{PATH}scripts/analysed/vid{vid_number}.txt"
+        vid_path = f"{PATH}scripts/analysed/gen2/vid{vid_number}.txt"
         dataset = np.genfromtxt(vid_path, dtype=float, delimiter=",").T
 
-        # sort and convert to mm
-        ind = np.argsort(dataset[0])
-        depths = np.array(dataset[0])[ind] * 10
-        slice_thicknesses = np.array(dataset[1])[ind] * 10
-        pixel_values = np.array(dataset[2])[ind]
+        # convert to mm
+        dataset[:-1] *= 10
 
-        # calculate low contrast penetration from pixel values
-        index = None
-        for i, number in enumerate(pixel_values):
-            # start from half way through so nothing at start is picked up
-            if i < len(pixel_values) / 2:
-                continue
-            if number < threshold:
-                index = i
-                break
-        
-        # if pixel value falls below threshold, that depths is the LCP. If it does not,
-        # LCP is the deepest point recorded.
-        if index is not None:
-            LCP = depths[index - 1]
-        else:
-            LCP = depths[-1]
-
-        # average slice thicknesses recorded for the same depth.
-        reduced_st = []
-        reduced_depths, indices = np.unique(depths, return_index=True)
-        pairs = list(pairwise(indices))
-        for pair in pairs:
-            reduced_st.append(np.median(slice_thicknesses[pair[0]:pair[1]]))
-        # pairwise misses out the last section so add it back in.
-        reduced_st.append(np.median(slice_thicknesses[list(pairs)[-1][1]:]))
-
-        # trim points before first maximum
-        reduced_depths, reduced_st = trim_start(reduced_depths, reduced_st)
-
-        # trim points after final maximum
-        reduced_depths, reduced_st = trim_end(reduced_depths, reduced_st)
-
-        # smooth
-        reduced_st = gf1d(reduced_st, smoothing_factor)
-
-        dead_zone = depths[0]
+        reduced_depths, reduced_st, dead_zone, LCP = process_raw_video_data(dataset, threshold, smoothing_factor)
 
         vid_arrays.append([reduced_depths, reduced_st])
         LCPs.append([dead_zone, LCP])
-
-        # print(dead_zone, LCP)
 
     """
     The following section loops through all the videos and diameters to find L for each diameter
@@ -129,6 +147,7 @@ def extract_Ls(required_videos, pipe_diameters, smoothing_factor=3, threshold=20
     """
     shallow_dict = {}
     deep_dict = {}
+    problems = []
 
     for diameter in pipe_diameters:
         # dictionaries to store the intersection points for each diameter from all videos
@@ -172,20 +191,35 @@ def extract_Ls(required_videos, pipe_diameters, smoothing_factor=3, threshold=20
                     deep_dict[diameter].append(LCPs[i][1])
             
             else:
-                print(f"curve intersects y={diameter} at x={depth_vals}")
+                # print(f"curve intersects number {i}'s y={diameter} at x={depth_vals}")
+                problems.append(diameter)
 
 
     L_dict = {}
+    L_list = []
+    final_diameters = []
     for diameter in pipe_diameters:
         # pipe not seen
         if len(deep_dict[diameter]) == 0 and len(shallow_dict[diameter]) == 0:
-            L_dict[diameter] = 0
+            if diameter in problems:
+                # there was an issue with this one so skip it.
+                print(f"skipping {diameter} due to problems")
+                continue
+            else:
+                # the pipe was not seen so set L to 0.
+                L_dict[diameter] = 0
+                L_list.append(0)
         else:
             # calculate L for that diameter by subtracting the shallowest sighting from the deepest.
             L_dict[diameter] = np.max(deep_dict[diameter]) - np.min(shallow_dict[diameter])
+            L_list.append(np.max(deep_dict[diameter]) - np.min(shallow_dict[diameter]))
+        final_diameters.append(diameter)
 
+    # append the LCP and infinity
+    L_list.append(np.max(LCPs))
+    final_diameters.append(np.inf)
     
-    return L_dict
+    return L_dict, L_list, final_diameters
     
 
 

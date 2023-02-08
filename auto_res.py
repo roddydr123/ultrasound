@@ -78,6 +78,11 @@ def rectSides(bisecting_coords, curve_area):
 
 def plotter(sides, d_inverse_diameters, d_lengths):
 
+    # find where y goes to zero to rescale the plot
+    ind = np.nonzero(d_lengths)
+    d_inverse_diameters = d_inverse_diameters[ind]
+    d_lengths = d_lengths[ind]
+
     fig, ax = plt.subplots()
     ax.scatter(sides[0], sides[1], c="k", marker="x")
 
@@ -94,22 +99,27 @@ def plotter(sides, d_inverse_diameters, d_lengths):
     plt.show()
 
 
-def calc_resolution_integral(videos, pipe_diameters):
+def calc_resolution_integral():
+    videos = [72,73,74,75]
+    pipe_diameters = np.linspace(0.1, 8, 200)
+    L_dict, lengths, diameters = extract_Ls(videos, pipe_diameters, 20, 3)
 
+    diameters = np.array(diameters)[::-1] / np.sqrt(np.cos(np.deg2rad(40))) # convert to effective diameter and reverse
+    inverse_diameters = 1 / diameters
+    lengths = np.array(lengths)[::-1]
 
+    # # find smallest detectable pipe index
+    # s_index = np.argmin(lengths) - 1
 
-    # find smallest detectable pipe index
-    s_index = np.argmin(lengths) - 1
+    # extrap_inverse_diam = inverse_diameters[s_index] - (lengths[s_index] * (inverse_diameters[s_index-1] \
+    #                       - inverse_diameters[s_index])/(lengths[s_index-1] - lengths[s_index] + 0.00001)+0.00001)
 
-    extrap_inverse_diam = inverse_diameters[s_index] - (lengths[s_index] * (inverse_diameters[s_index-1] \
-                          - inverse_diameters[s_index])/(lengths[s_index-1] - lengths[s_index] + 0.00001)+0.00001)
+    # # set the biggest invisible pipe to whichever's smaller out of the extrapolated inverse diameter
+    # # or its usual inverse diameter.
+    # if inverse_diameters[s_index + 1] > extrap_inverse_diam:
+    #     inverse_diameters[s_index + 1] = extrap_inverse_diam
 
-    # set the biggest invisible pipe to whichever's smaller out of the extrapolated inverse diameter
-    # or its usual inverse diameter.
-    if inverse_diameters[s_index + 1] > extrap_inverse_diam:
-        inverse_diameters[s_index + 1] = extrap_inverse_diam
-
-    lengths[s_index + 1:] = 0
+    # lengths[s_index + 1:] = 0
 
     # new grid
     d_inverse_diameters = np.linspace(inverse_diameters[0], inverse_diameters[-1], int(1E4))
@@ -153,4 +163,6 @@ def calc_resolution_integral(videos, pipe_diameters):
 
     plotter(sides, d_inverse_diameters, d_lengths)
 
-main()
+
+
+calc_resolution_integral()
