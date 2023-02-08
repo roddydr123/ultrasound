@@ -3,6 +3,7 @@ import numpy as np
 import sys
 from scipy.ndimage import gaussian_filter1d as gf1d
 from videos import fetch_video_details
+from slice_thickness import process_raw_video_data
 
 
 PATH = "/home/david/Documents/uni/year-5/ultrasound/scripts/analysed/"
@@ -14,20 +15,22 @@ def plotter(data, title, details_list):
     for i, dataset in enumerate(data):
         # order data to be deeper monotonically.
         ind = np.argsort(dataset[0])
-        x = np.array(dataset[0])[ind]
-        y = np.array(dataset[1])[ind]
+        x = np.array(dataset[0])[ind] * 10
+        y = np.array(dataset[1])[ind] * 10
         h = np.array(dataset[2])[ind]
+        x, y, dz, LCP = process_raw_video_data([x,y,h], 20, 2)
         # smooth the line and plot it.
-        ax.plot(x, gf1d(list(map(lambda x: x * 10, y)), 4), label=details_list[i])
-        newax = ax.twinx()
-        newax.plot(x, h, "r")
+        ax.plot(x, y, label=details_list[i])
+        # ax.plot(x, gf1d(list(map(lambda x: x * 10, y)), 4), label=details_list[i])
+        # newax = ax.twinx()
+        # newax.plot(x, h, "r")
     ax.set_xlabel("Depth/cm")
     ax.set_ylabel("Slice thickness/mm")
     ax.legend()
     xlims = ax.get_xlim()
     ax.set_xlim(0, xlims[1])
     ax.set_ylim(0, ax.get_ylim()[1])
-    newax.set_ylim(0, newax.get_ylim()[1])
+    # newax.set_ylim(0, newax.get_ylim()[1])
     ax.yaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
     plt.show()
