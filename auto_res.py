@@ -100,13 +100,24 @@ def plotter(sides, inverse_diameters, lengths):
 
 
 def calc_resolution_integral():
-    videos = ["50", "51", "56", "57"]
-    videos = ["01", "04"]
-    inv_diameters = np.linspace(0.01, 0.7, 400)
+    # videos = ["58", "59", "62", "63"]
+    # videos = ["27", "28", "29", "30"]
+    # videos = ["01", "04"]
+    # videos = [25,26,31,32]
+    # videos = [35,36,37,38]
+    # videos = [68,69,70,71]
+    # videos = [64,65,66,67]
+    videos = [78,79,80,81]
+    
+    # choose inverse diameter range
+    inv_diameters = np.linspace(0.01, 1.7, 400)
+
     pipe_diameters = 1 / inv_diameters[::-1]
-    # pipe_diameters = np.linspace(0.5, 100, 2000)
+
     L_dict, lengths, diameters = extract_Ls(videos, pipe_diameters, 20, 3)
     # print(L_dict)
+    # plt.scatter(diameters, lengths)
+    # plt.show()
     diameters = np.array(diameters)[::-1] / np.sqrt(np.cos(np.deg2rad(40))) # convert to effective diameter and reverse
     inverse_diameters = 1 / diameters
 
