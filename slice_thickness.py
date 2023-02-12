@@ -38,12 +38,16 @@ def trim_start(reduced_depths, reduced_st, reduced_pixel_values):
         # temporary smoothing to help find initial peak
         temp_st = gf1d(reduced_st, 1)
         peaks, props = find_peaks(temp_st, width=(5, 70))
+        # check if it found any peaks
         if len(peaks) != 0:
-            # trim all before first peak
-            first_peak = peaks[0]
-            reduced_depths = reduced_depths[first_peak:]
-            reduced_pixel_values = reduced_pixel_values[first_peak:]
-            reduced_st = reduced_st[first_peak:]
+            # check if the peak is actually near the start...
+            half = reduced_depths[int(len(reduced_depths) / 2.5)]
+            if reduced_depths[peaks[0]] < half:
+                # trim all before first peak
+                first_peak = peaks[0]
+                reduced_depths = reduced_depths[first_peak:]
+                reduced_pixel_values = reduced_pixel_values[first_peak:]
+                reduced_st = reduced_st[first_peak:]
         return reduced_depths, reduced_st, reduced_pixel_values
 
 
@@ -54,10 +58,13 @@ def trim_end(reduced_depths, reduced_st, reduced_pixel_values):
     peaks, props = find_peaks(temp_st, width=(10, 100))
     # trim all after last peak
     if len(peaks) != 0:
-        last_peak = peaks[-1]
-        reduced_depths = reduced_depths[:last_peak]
-        reduced_pixel_values = reduced_pixel_values[:last_peak]
-        reduced_st = reduced_st[:last_peak]
+        # check if near end
+        half = reduced_depths[int(len(reduced_depths) / 2.5)]
+        if reduced_depths[peaks[0]] > half:
+            last_peak = peaks[-1]
+            reduced_depths = reduced_depths[:last_peak]
+            reduced_pixel_values = reduced_pixel_values[:last_peak]
+            reduced_st = reduced_st[:last_peak]
     return reduced_depths, reduced_st, reduced_pixel_values
 
 
