@@ -173,64 +173,39 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
 
             # points where the slice thickness curve crosses that pipe diameter.
             depth_vals = solve_for_x(vid_data[0], vid_data[1], diameter)
+            # print(LCPs[i])
             dead_zone = LCPs[i][0]
             LCP = LCPs[i][1]
 
-            deep = None
-            shallow = None
+            # set defaults
+            deep = LCP
+            shallow = dead_zone
 
-            # does not cross
+            # do not intersect
             if len(depth_vals) == 0:
-                curve_max = vid_data[1].max()
-                # pipe diameter is too small to be seen.
-                if diameter < curve_max:
+                curve_min = vid_data[1].min()
+                # pipe diameter is too small to be seen so end iteration
+                # without appending.
+                if diameter < curve_min:
                     continue
-                elif diameter > curve_max:
-                    # pipe is definitely seen both deep and shallow,
-                    shallow = dead_zone
-                    deep = LCP
 
-            # intersects twice, once shallow and once deep
-            elif len(depth_vals) == 2:
-                shallow = depth_vals[0]
-                deep = depth_vals[1]
+            # take the minimum slice thickness value as the bound between
+            # shallow and deep.
+            boundary = vid_data[0][np.argmin(vid_data[1])]
+            depth_vals = np.array(depth_vals)
 
-            # intersects once, deep or shallow?
-            elif len(depth_vals) == 1:
-                # take the minimum slice thickness value as the bound between
-                # shallow and deep.
-                boundary = vid_data[0][np.argmin(vid_data[1])]
-                if depth_vals[0] > boundary:
-                    # its a deep intersection so use dead zone for shallow
-                    deep = depth_vals[0]
-                    shallow = dead_zone
-                else:
-                    # its shallow so use LCP for deep
-                    shallow = depth_vals[0]
-                    deep = LCP
-            
-            else:
-                # more than two intersections which could be a problem.
-                # see if they are close together in which case average them.
-                # if not, get rid of them.
+            # partition into shallows and deeps
+            shallows = depth_vals[depth_vals < boundary]
+            deeps = depth_vals[depth_vals > boundary]
 
-                # partition into shallows and deeps.
-                boundary = vid_data[0][np.argmin(vid_data[1])]
-                depth_vals = np.array(depth_vals)
-                shallows = depth_vals[depth_vals < boundary]
-                deeps = depth_vals[depth_vals > boundary]
+            # if there are any intersections save them.
+            if len(shallows) != 0 and np.std(shallows) <= 5:
+                shallow = np.average(shallows)
+            if len(deeps) != 0 and np.std(deeps) <= 5:
+                deep = np.average(deeps)
 
-                if np.std(shallows) <= 5:
-                    shallow = np.average(shallows)
-                if np.std(deeps) <= 5:
-                    deep = np.average(deeps)
-                
-                # register a potential problem with this diameter
-                problems.append(diameter)
-        
-            if shallow is not None and deep is not None:
-                shallow_dict[diameter].append(np.min((shallow, dead_zone)))
-                deep_dict[diameter].append(np.min((deep, LCP)))
+            shallow_dict[diameter].append(np.max((shallow, dead_zone)))
+            deep_dict[diameter].append(np.min((deep, LCP)))
 
 
     L_dict = {}
