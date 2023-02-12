@@ -12,6 +12,7 @@ PATH_TO_DETAILS = "/home/david/Documents/uni/year-5/ultrasound/videos/"
 
 def plotter(data, title, details_list):
     fig, ax = plt.subplots(figsize=(14, 10))
+    newax = ax.twinx()
     for i, dataset in enumerate(data):
         # order data to be deeper monotonically.
         ind = np.argsort(dataset[0])
@@ -21,8 +22,6 @@ def plotter(data, title, details_list):
         x, y, h, dz, LCP = process_raw_video_data([x,y,h], 20, 3)
         # smooth the line and plot it.
         ax.plot(x, y, label=details_list[i])
-        # ax.plot(x, gf1d(list(map(lambda x: x * 10, y)), 4), label=details_list[i])
-        # newax = ax.twinx()
         # newax.plot(x, h, "r")
     ax.set_xlabel("Depth/cm")
     ax.set_ylabel("Slice thickness/mm")
@@ -30,7 +29,7 @@ def plotter(data, title, details_list):
     xlims = ax.get_xlim()
     ax.set_xlim(0, xlims[1])
     ax.set_ylim(0, ax.get_ylim()[1])
-    # newax.set_ylim(0, newax.get_ylim()[1])
+    newax.set_ylim(0, newax.get_ylim()[1])
     ax.yaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
     plt.show()
