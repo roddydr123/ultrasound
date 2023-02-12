@@ -34,27 +34,29 @@ def solve_for_x(x_points, y_points, y):
 
 
 
-def trim_start(reduced_depths, reduced_st):
+def trim_start(reduced_depths, reduced_st, reduced_pixel_values):
         # temporary smoothing to help find initial peak
         temp_st = gf1d(reduced_st, 1)
         peaks, props = find_peaks(temp_st, width=(5, 70))
         # trim all before first peak
         first_peak = peaks[0]
         reduced_depths = reduced_depths[first_peak:]
+        reduced_pixel_values = reduced_pixel_values[first_peak:]
         reduced_st = reduced_st[first_peak:]
-        return reduced_depths, reduced_st
+        return reduced_depths, reduced_st, reduced_pixel_values
 
 
 
-def trim_end(reduced_depths, reduced_st):
+def trim_end(reduced_depths, reduced_st, reduced_pixel_values):
     # temporary smoothing to help find initial peak
     temp_st = gf1d(reduced_st, 1)
     peaks, props = find_peaks(temp_st, width=(10, 100))
     # trim all after last peak
     last_peak = peaks[-1]
     reduced_depths = reduced_depths[:last_peak]
+    reduced_pixel_values = reduced_pixel_values[:last_peak]
     reduced_st = reduced_st[:last_peak]
-    return reduced_depths, reduced_st
+    return reduced_depths, reduced_st, reduced_pixel_values
 
 
 
@@ -63,18 +65,20 @@ def process_raw_video_data(dataset, threshold, smoothing_factor):
     processes it.
 
     Args:
-        dataset (np.array): data from the video, should be 2 by data length. Data in mm.
+        dataset (np.array): data from the video, should be 3 by data length. Data in mm.
         threshold (float): Set LCP as depth when pixel value drops below this threshold.
         smoothing_factor (int): choose how much to smooth the outputted STs by.
 
     Returns:
-        list: [reduced_depths, reduced_st, dead zone, LCP] - the processed video data.
+        list: [reduced_depths, reduced_st, reduced_pixel_value, dead zone, LCP] - the processed video data.
     """
     # sort and convert to mm
     ind = np.argsort(dataset[0])
     depths = np.array(dataset[0])[ind]
     slice_thicknesses = np.array(dataset[1])[ind]
-    pixel_values = np.array(dataset[2])[ind]
+
+    # smooth the pixel value curve for better LCP determination
+    pixel_values = gf1d(np.array(dataset[2])[ind], 3)
 
     # calculate low contrast penetration from pixel values
     index = None
@@ -93,30 +97,33 @@ def process_raw_video_data(dataset, threshold, smoothing_factor):
     else:
         LCP = depths[-1]
 
-    # average slice thicknesses recorded for the same depth.
+    # average slice thicknesses and peak heights recorded for the same depth.
     reduced_st = []
+    reduced_pixel_values = []
     reduced_depths, indices = np.unique(depths, return_index=True)
     pairs = list(pairwise(indices))
     for pair in pairs:
         reduced_st.append(np.median(slice_thicknesses[pair[0]:pair[1]]))
+        reduced_pixel_values.append(np.median(pixel_values[pair[0]:pair[1]]))
     # pairwise misses out the last section so add it back in.
-    reduced_st.append(np.median(slice_thicknesses[list(pairs)[-1][1]:]))
+    reduced_st.append(np.median(slice_thicknesses[pairs[-1][1]:]))
+    reduced_pixel_values.append(np.median(pixel_values[pairs[-1][1]:]))
 
     # presmooth
     reduced_st = gf1d(reduced_st, smoothing_factor)
 
     # trim points before first maximum
-    reduced_depths, reduced_st = trim_start(reduced_depths, reduced_st)
+    reduced_depths, reduced_st, reduced_pixel_values = trim_start(reduced_depths, reduced_st, reduced_pixel_values)
 
     # trim points after final maximum
-    reduced_depths, reduced_st = trim_end(reduced_depths, reduced_st)
+    reduced_depths, reduced_st, reduced_pixel_values = trim_end(reduced_depths, reduced_st, reduced_pixel_values)
 
     # smooth
     # reduced_st = gf1d(reduced_st, smoothing_factor)
 
     dead_zone = depths[0]
 
-    return reduced_depths, reduced_st, dead_zone, LCP
+    return reduced_depths, reduced_st, reduced_pixel_values, dead_zone, LCP
 
 
 
@@ -135,7 +142,7 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
         # convert to mm
         dataset[:-1] *= 10
 
-        reduced_depths, reduced_st, dead_zone, LCP = process_raw_video_data(dataset, threshold, smoothing_factor)
+        reduced_depths, reduced_st, reduced_pixel_values, dead_zone, LCP = process_raw_video_data(dataset, threshold, smoothing_factor)
 
         vid_arrays.append([reduced_depths, reduced_st])
         LCPs.append([dead_zone, LCP])
@@ -229,7 +236,7 @@ def main():
     elif sys.argv[1] == "L":
         extract_Ls(sys.argv[2], sys.argv[3])
     elif sys.argv[1] == "all":
-        videos = [89]#np.arange(23, 90, 1)
+        videos = [8, 19, 47, 53, 60, 66, 82, 84, 89]#np.arange(23, 90, 1)
         for video in videos:
             n = str(video).zfill(2)
             try:
