@@ -6,7 +6,7 @@ from videos import fetch_video_details
 from slice_thickness import process_raw_video_data
 
 
-PATH = "/home/david/Documents/uni/year-5/ultrasound/scripts/analysed/gen2/"
+PATH = "/home/david/Documents/uni/year-5/ultrasound/scripts/analysed/gen3/"
 PATH_TO_DETAILS = "/home/david/Documents/uni/year-5/ultrasound/videos/"
 
 
@@ -22,8 +22,8 @@ def plotter(data, title, details_list):
         # smooth the line and plot it.
         ax.plot(x, y, label=details_list[i])
         # ax.plot(x, gf1d(list(map(lambda x: x * 10, y)), 4), label=details_list[i])
-        newax = ax.twinx()
-        newax.plot(x, h, "r")
+        # newax = ax.twinx()
+        # newax.plot(x, h, "r")
     ax.set_xlabel("Depth/cm")
     ax.set_ylabel("Slice thickness/mm")
     ax.legend()

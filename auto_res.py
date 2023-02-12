@@ -100,8 +100,8 @@ def plotter(sides, d_inverse_diameters, d_lengths):
 
 
 def calc_resolution_integral():
-    videos = [72,73,74,75]
-    pipe_diameters = np.linspace(0.1, 8, 200)
+    videos = ["27", "28", "29", "30"]
+    pipe_diameters = np.linspace(0.5, 30, 200)
     L_dict, lengths, diameters = extract_Ls(videos, pipe_diameters, 20, 3)
 
     diameters = np.array(diameters)[::-1] / np.sqrt(np.cos(np.deg2rad(40))) # convert to effective diameter and reverse
@@ -129,10 +129,10 @@ def calc_resolution_integral():
     d_lengths = np.array(interp(d_inverse_diameters))
 
     # make sure the splines arent bouncing around in the negatives or coming back from 0.
-    negative = np.where(d_lengths >= 0, d_lengths, np.zeros_like(d_lengths))
-    first_zero = np.argmin(negative)
-    negative[first_zero:] = 0
-    d_lengths = negative
+    # negative = np.where(d_lengths >= 0, d_lengths, np.zeros_like(d_lengths))
+    # first_zero = np.argmin(negative)
+    # negative[first_zero:] = 0
+    # d_lengths = negative
 
     # find the area under the curve (the resolution integral)
     area = abs(np.trapz(lengths, inverse_diameters))
@@ -160,6 +160,8 @@ def calc_resolution_integral():
     print(f"characteristic resolution: {np.round(1/sides[0], 3)}mm")
     print(f"depth of field: {np.round(sides[1], 2)}mm")
     print(f"Resolution integral: {np.round(area, 2)}")
+
+    # print(d_inverse_diameters, d_lengths)
 
     plotter(sides, d_inverse_diameters, d_lengths)
 

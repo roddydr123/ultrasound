@@ -16,7 +16,7 @@ def get_slice_thickness(number):
                "filepath": f"{PATH}videos/", "filenumber": f"{number}"}
     vid = Video(viddata)
 
-    vid.save_slice_thickness_data(5, f"{PATH}scripts/analysed/gen2/vid{viddata['filenumber']}.txt")
+    vid.save_slice_thickness_data(5, f"{PATH}scripts/analysed/gen3/vid{viddata['filenumber']}.txt")
 
 
 
@@ -145,7 +145,7 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
     LCPs = []
     # load in slice thickness plot data
     for vid_number in required_videos:
-        vid_path = f"{PATH}scripts/analysed/gen2/vid{vid_number}.txt"
+        vid_path = f"{PATH}scripts/analysed/gen3/vid{vid_number}.txt"
         dataset = np.genfromtxt(vid_path, dtype=float, delimiter=",").T
 
         # convert to mm
