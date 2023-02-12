@@ -38,24 +38,26 @@ def trim_start(reduced_depths, reduced_st, reduced_pixel_values):
         # temporary smoothing to help find initial peak
         temp_st = gf1d(reduced_st, 1)
         peaks, props = find_peaks(temp_st, width=(5, 70))
-        # trim all before first peak
-        first_peak = peaks[0]
-        reduced_depths = reduced_depths[first_peak:]
-        reduced_pixel_values = reduced_pixel_values[first_peak:]
-        reduced_st = reduced_st[first_peak:]
+        if len(peaks) != 0:
+            # trim all before first peak
+            first_peak = peaks[0]
+            reduced_depths = reduced_depths[first_peak:]
+            reduced_pixel_values = reduced_pixel_values[first_peak:]
+            reduced_st = reduced_st[first_peak:]
         return reduced_depths, reduced_st, reduced_pixel_values
 
 
 
 def trim_end(reduced_depths, reduced_st, reduced_pixel_values):
-    # temporary smoothing to help find initial peak
+    # temporary smoothing to help find deep peak
     temp_st = gf1d(reduced_st, 1)
     peaks, props = find_peaks(temp_st, width=(10, 100))
     # trim all after last peak
-    last_peak = peaks[-1]
-    reduced_depths = reduced_depths[:last_peak]
-    reduced_pixel_values = reduced_pixel_values[:last_peak]
-    reduced_st = reduced_st[:last_peak]
+    if len(peaks) != 0:
+        last_peak = peaks[-1]
+        reduced_depths = reduced_depths[:last_peak]
+        reduced_pixel_values = reduced_pixel_values[:last_peak]
+        reduced_st = reduced_st[:last_peak]
     return reduced_depths, reduced_st, reduced_pixel_values
 
 
@@ -185,10 +187,11 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
 
             # intersects once, deep or shallow?
             elif len(depth_vals) == 1:
-                # slightly more than halfway depth since curves are
-                # usually skewed towards the start
-                half = vid_data[0][int(len(vid_data[0]) / 2.5)]
-                if depth_vals[0] > half:
+                # take the minimum slice thickness value as the bound between
+                # shallow and deep.
+                # print(vid_data[1])
+                boundary = vid_data[0][np.argmin(vid_data[1])]
+                if depth_vals[0] > boundary:
                     # its a deep intersection so use dead zone for shallow
                     deep_dict[diameter].append(depth_vals[0])
                     shallow_dict[diameter].append(LCPs[i][0])
