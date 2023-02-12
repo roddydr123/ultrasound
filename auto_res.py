@@ -41,18 +41,18 @@ def bisectObjFunc(ycoord, args):
     """
 
     area_curve = args[0]
-    d_inverse_diameters = args[1]
-    d_lengths = args[2]
+    inverse_diameters = args[1]
+    lengths = args[2]
 
     # get straight line vals for all 1/D vals
-    line = Line([0,0], [reference_x_coord, ycoord], d_inverse_diameters)
+    line = Line([0,0], [reference_x_coord, ycoord], inverse_diameters)
     d_linear_lengths = line.get_points_on_line()
-    # plt.plot(d_inverse_diameters, d_linear_lengths)
+    # plt.plot(inverse_diameters, d_linear_lengths)
 
     # take only the section where the difference between the two lines is +ve
-    difference = d_lengths - d_linear_lengths
+    difference = lengths - d_linear_lengths
     r_difference = np.where(difference > 0, difference, np.zeros_like(difference))
-    r_inverse_diameters = np.where(difference > 0, d_inverse_diameters, np.zeros_like(difference))
+    r_inverse_diameters = np.where(difference > 0, inverse_diameters, np.zeros_like(difference))
 
     # find area between line and curve on both sides
     a_between = abs(np.trapz(r_difference, r_inverse_diameters))
@@ -76,17 +76,17 @@ def rectSides(bisecting_coords, curve_area):
     return [x_side, y_side]
 
 
-def plotter(sides, d_inverse_diameters, d_lengths):
+def plotter(sides, inverse_diameters, lengths):
 
     # find where y goes to zero to rescale the plot
-    ind = np.nonzero(d_lengths)
-    d_inverse_diameters = d_inverse_diameters[ind]
-    d_lengths = d_lengths[ind]
+    ind = np.nonzero(lengths)
+    inverse_diameters = inverse_diameters[ind]
+    lengths = lengths[ind]
 
     fig, ax = plt.subplots()
     ax.scatter(sides[0], sides[1], c="k", marker="x")
 
-    ax.plot(d_inverse_diameters, d_lengths)
+    ax.plot(inverse_diameters, lengths)
     ax.set_xlabel("$\\alpha$ (1/mm)")
     ax.set_ylabel("Lr (mm)")
 
@@ -100,39 +100,17 @@ def plotter(sides, d_inverse_diameters, d_lengths):
 
 
 def calc_resolution_integral():
-    videos = ["27", "28", "29", "30"]
-    pipe_diameters = np.linspace(0.5, 30, 200)
+    videos = ["50", "51", "56", "57"]
+    videos = ["01", "04"]
+    inv_diameters = np.linspace(0.01, 0.7, 400)
+    pipe_diameters = 1 / inv_diameters[::-1]
+    # pipe_diameters = np.linspace(0.5, 100, 2000)
     L_dict, lengths, diameters = extract_Ls(videos, pipe_diameters, 20, 3)
-
+    # print(L_dict)
     diameters = np.array(diameters)[::-1] / np.sqrt(np.cos(np.deg2rad(40))) # convert to effective diameter and reverse
     inverse_diameters = 1 / diameters
+
     lengths = np.array(lengths)[::-1]
-
-    # # find smallest detectable pipe index
-    # s_index = np.argmin(lengths) - 1
-
-    # extrap_inverse_diam = inverse_diameters[s_index] - (lengths[s_index] * (inverse_diameters[s_index-1] \
-    #                       - inverse_diameters[s_index])/(lengths[s_index-1] - lengths[s_index] + 0.00001)+0.00001)
-
-    # # set the biggest invisible pipe to whichever's smaller out of the extrapolated inverse diameter
-    # # or its usual inverse diameter.
-    # if inverse_diameters[s_index + 1] > extrap_inverse_diam:
-    #     inverse_diameters[s_index + 1] = extrap_inverse_diam
-
-    # lengths[s_index + 1:] = 0
-
-    # new grid
-    d_inverse_diameters = np.linspace(inverse_diameters[0], inverse_diameters[-1], int(1E4))
-
-    # interpolate a denser resolution integral 
-    interp = us(inverse_diameters, lengths, s=0, k=1)
-    d_lengths = np.array(interp(d_inverse_diameters))
-
-    # make sure the splines arent bouncing around in the negatives or coming back from 0.
-    # negative = np.where(d_lengths >= 0, d_lengths, np.zeros_like(d_lengths))
-    # first_zero = np.argmin(negative)
-    # negative[first_zero:] = 0
-    # d_lengths = negative
 
     # find the area under the curve (the resolution integral)
     area = abs(np.trapz(lengths, inverse_diameters))
@@ -146,7 +124,7 @@ def calc_resolution_integral():
     # resolution integral.
     n_bs = []
     for i in ycoord_range:
-        n_bs.append(bisectObjFunc(i, [area, d_inverse_diameters, d_lengths]))
+        n_bs.append(bisectObjFunc(i, [area, inverse_diameters, lengths]))
 
     # find the y coordinate which gives the smallest non_bisectionality
     y_min = ycoord_range[np.argmin(n_bs)]
@@ -161,9 +139,9 @@ def calc_resolution_integral():
     print(f"depth of field: {np.round(sides[1], 2)}mm")
     print(f"Resolution integral: {np.round(area, 2)}")
 
-    # print(d_inverse_diameters, d_lengths)
+    # print(inverse_diameters, lengths)
 
-    plotter(sides, d_inverse_diameters, d_lengths)
+    plotter(sides, inverse_diameters, lengths)
 
 
 
