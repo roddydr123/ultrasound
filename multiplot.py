@@ -18,12 +18,12 @@ def plotter(data, title, details_list):
         x = np.array(dataset[0])[ind] * 10
         y = np.array(dataset[1])[ind] * 10
         h = np.array(dataset[2])[ind]
-        x, y, dz, LCP = process_raw_video_data([x,y,h], 20, 2)
+        x, y, h, dz, LCP = process_raw_video_data([x,y,h], 20, 3)
         # smooth the line and plot it.
         ax.plot(x, y, label=details_list[i])
         # ax.plot(x, gf1d(list(map(lambda x: x * 10, y)), 4), label=details_list[i])
-        # newax = ax.twinx()
-        # newax.plot(x, h, "r")
+        newax = ax.twinx()
+        newax.plot(x, h, "r")
     ax.set_xlabel("Depth/cm")
     ax.set_ylabel("Slice thickness/mm")
     ax.legend()
