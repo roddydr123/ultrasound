@@ -49,7 +49,8 @@ from scipy.interpolate import UnivariateSpline as us
 # lengths = np.array([0.0, 0.0, 6.4, 24.4, 43.5, 58.5, 83.9, 97.7, 132.6, 137.9, 137.9, 137.9]) / 10  # NHS data 9L4 lab folder
 # lengths = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 41.0, 73.6, 121.0, 169.5, 197.1, 203.1, 221.5]) / 10   # NHS data C1-5 lab folder
 # lengths = [0,2.2,12.8,19.1,28.7,39.7,60.9,64.9,65.5,66.6,65.9,65.2] # NHS data in folder 18L6
-lengths = [0,0,0,0,0,4.6,47.1,117.2,175.6,195,200.5,215.8]  # NHS data in folder 6C1
+# lengths = [0,0,0,0,0,4.6,47.1,117.2,175.6,195,200.5,215.8]  # NHS data in folder 6C1
+lengths = [0,0,0,0,0,22.9,72.6,108,148,197,201,233] # 4C1 NHS folder
 
 
 """Pipe/slice thickness diameters in mm"""
