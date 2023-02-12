@@ -163,7 +163,6 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
     """
     shallow_dict = {}
     deep_dict = {}
-    problems = []
 
     for diameter in pipe_diameters:
         # dictionaries to store the intersection points for each diameter from all videos
@@ -214,14 +213,9 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
     for diameter in pipe_diameters:
         # pipe not seen
         if len(deep_dict[diameter]) == 0 and len(shallow_dict[diameter]) == 0:
-            if diameter in problems:
-                # there was an issue with this one so skip it.
-                print(f"skipping {diameter} due to problems")
-                continue
-            else:
-                # the pipe was not seen so set L to 0.
-                L_dict[diameter] = 0
-                L_list.append(0)
+            # the pipe was not seen so set L to 0.
+            L_dict[diameter] = 0
+            L_list.append(0)
         else:
             # calculate L for that diameter by subtracting the shallowest sighting from the deepest.
             L = np.max(deep_dict[diameter]) - np.min(shallow_dict[diameter])
