@@ -73,7 +73,7 @@ class Video():
         ret, frame = self.cap.read()
         # skip frames which are not read in properly.
         if frame is None:
-            return 0, 0
+            return 0, 0, 0
         profile = self.get_profile(frame)
         profile -= self.bkgd
 
@@ -85,23 +85,22 @@ class Video():
 
         # get the height of the peak
         peak, props = find_peaks(trimmed_profile, distance=len(profile), width=(5, 70), height=(0, 5000))
-        if len(props["peak_heights"]) != 0:
-            peak_height = float(props["peak_heights"])
-        else:
-            peak_height = 0
+        height_list = props["peak_heights"]
+        width_list = props["widths"]
 
+        # if the peak finder hasn't been able to identify a peak or finds too many.
+        if len(height_list) != 1 or len(width_list) != 1:
+            return 0, 0, 0
 
-        width_cm = 0
-        peak_depth_cm = 0
-        if len(props['widths']) != 0:
-            width = props['widths'][0]
+        peak_height = height_list[0]
+        width = width_list[0]
 
-            # add back in the pixels we trimmed off to maintain accurate depth.
-            peak_depth_pixels = peak[0] + pixels_to_trim
-            conv_factor = self.total_depth_cm / self.total_depth_pixels
-            peak_depth_cm = conv_factor * peak_depth_pixels
+        # add back in the pixels we trimmed off to maintain accurate depth.
+        peak_depth_pixels = peak[0] + pixels_to_trim
+        conv_factor = self.total_depth_cm / self.total_depth_pixels
+        peak_depth_cm = conv_factor * peak_depth_pixels
 
-            width_cm = conv_factor * width
+        width_cm = conv_factor * width
 
         # speed of sound conversion factor
         scf = 0.94
@@ -119,7 +118,8 @@ class Video():
         width_indices = np.arange(0, self.frame_count, resolution)
         for index in tqdm(width_indices):
             width, depth_cm, peak_height = self.analyseFrame(index)
-            if width == 0:  # check if the peak was found successfully
+            # check if the peak was found successfully and skip if not
+            if width == 0 or peak_height == 0:
                 continue
             widths.append(width)
             depths.append(depth_cm)
