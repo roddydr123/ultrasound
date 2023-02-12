@@ -173,24 +173,27 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
 
             # points where the slice thickness curve crosses that pipe diameter.
             depth_vals = solve_for_x(vid_data[0], vid_data[1], diameter)
+            dead_zone = LCPs[i][0]
+            LCP = LCPs[i][1]
+
+            deep = None
+            shallow = None
 
             # does not cross
             if len(depth_vals) == 0:
                 curve_max = vid_data[1].max()
                 # pipe diameter is too small to be seen.
                 if diameter < curve_max:
-                    # shallow_dict.pop(diameter)
-                    # deep_dict.pop(diameter)
-                    pass
+                    continue
                 elif diameter > curve_max:
-                    # pipe is definitely seen both deep and shallow, 
-                    shallow_dict[diameter].append(LCPs[i][0])
-                    deep_dict[diameter].append(LCPs[i][1])
+                    # pipe is definitely seen both deep and shallow,
+                    shallow = dead_zone
+                    deep = LCP
 
             # intersects twice, once shallow and once deep
             elif len(depth_vals) == 2:
-                shallow_dict[diameter].append(depth_vals[0])
-                deep_dict[diameter].append(depth_vals[1])
+                shallow = depth_vals[0]
+                deep = depth_vals[1]
 
             # intersects once, deep or shallow?
             elif len(depth_vals) == 1:
@@ -199,12 +202,12 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
                 boundary = vid_data[0][np.argmin(vid_data[1])]
                 if depth_vals[0] > boundary:
                     # its a deep intersection so use dead zone for shallow
-                    deep_dict[diameter].append(depth_vals[0])
-                    shallow_dict[diameter].append(LCPs[i][0])
+                    deep = depth_vals[0]
+                    shallow = dead_zone
                 else:
                     # its shallow so use LCP for deep
-                    shallow_dict[diameter].append(depth_vals[0])
-                    deep_dict[diameter].append(LCPs[i][1])
+                    shallow = depth_vals[0]
+                    deep = LCP
             
             else:
                 # more than two intersections which could be a problem.
@@ -218,12 +221,16 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
                 deeps = depth_vals[depth_vals > boundary]
 
                 if np.std(shallows) <= 5:
-                    shallow_dict[diameter].append(np.average(shallows))
+                    shallow = np.average(shallows)
                 if np.std(deeps) <= 5:
-                    deep_dict[diameter].append(np.average(deeps))
+                    deep = np.average(deeps)
                 
                 # register a potential problem with this diameter
                 problems.append(diameter)
+        
+            if shallow is not None and deep is not None:
+                shallow_dict[diameter].append(np.min((shallow, dead_zone)))
+                deep_dict[diameter].append(np.min((deep, LCP)))
 
 
     L_dict = {}
@@ -242,8 +249,9 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
                 L_list.append(0)
         else:
             # calculate L for that diameter by subtracting the shallowest sighting from the deepest.
-            L_dict[diameter] = np.max(deep_dict[diameter]) - np.min(shallow_dict[diameter])
-            L_list.append(np.max(deep_dict[diameter]) - np.min(shallow_dict[diameter]))
+            L = np.max(deep_dict[diameter]) - np.min(shallow_dict[diameter])
+            L_dict[diameter] = L
+            L_list.append(L)
         final_diameters.append(diameter)
 
     # append the LCP and infinity
