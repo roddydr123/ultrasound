@@ -22,7 +22,7 @@ def plotter(data, title, details_list):
         x = np.array(dataset[0])[ind] * 10
         y = np.array(dataset[1])[ind] * 10
         h = np.array(dataset[2])[ind]
-        x, y, h, dz, LCP = process_raw_video_data([x,y,h], 20, 3)
+        x, y, h, dz, LCP = process_raw_video_data([x, y, h], 20, 3)
         # smooth the line and plot it.
         ax.plot(x, y, label=details_list[i])
         # newax.plot(x, h, "r")

@@ -50,7 +50,7 @@ from scipy.interpolate import UnivariateSpline as us
 # lengths = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 41.0, 73.6, 121.0, 169.5, 197.1, 203.1, 221.5]) / 10   # NHS data C1-5 lab folder
 # lengths = [0,2.2,12.8,19.1,28.7,39.7,60.9,64.9,65.5,66.6,65.9,65.2] # NHS data in folder 18L6
 # lengths = [0,0,0,0,0,4.6,47.1,117.2,175.6,195,200.5,215.8]  # NHS data in folder 6C1
-lengths = [0,0,0,0,0,22.9,72.6,108,148,197,201,233] # 4C1 NHS folder
+lengths = [0, 0, 0, 0, 0, 22.9, 72.6, 108, 148, 197, 201, 233]  # 4C1 NHS folder
 
 
 """Pipe/slice thickness diameters in mm"""
@@ -58,16 +58,20 @@ lengths = [0,0,0,0,0,22.9,72.6,108,148,197,201,233] # 4C1 NHS folder
 # diameters = [0.15, 0.3, 0.4, 0.6, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf]    # my custom diameters for ST
 # diameters = np.array([0.05, 0.3, 0.4, 0.6, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])    # my custom diameters for 14L5 ST
 # diameters = np.array([0.35, 0.42, 0.56, 0.70, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 7.9, np.inf])   # NHS data teams spreadsheet
-diameters = np.array([0.3, 0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])   # NHS data lab folder
+diameters = np.array(
+    [0.3, 0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf]
+)  # NHS data lab folder
 
-diameters = np.array(diameters)[::-1] / np.sqrt(np.cos(np.deg2rad(40))) # convert to effective diameter and reverse
+diameters = np.array(diameters)[::-1] / np.sqrt(
+    np.cos(np.deg2rad(40))
+)  # convert to effective diameter and reverse
 inverse_diameters = 1 / diameters
 lengths = np.array(lengths)[::-1]
 
 reference_x_coord = 0.00002
 
 
-class Line():
+class Line:
     def __init__(self, point1, point2, xvals) -> None:
         self.point1 = point1
         self.point2 = point2
@@ -105,14 +109,16 @@ def bisectObjFunc(ycoord, args):
     d_lengths = args[2]
 
     # get straight line vals for all 1/D vals
-    line = Line([0,0], [reference_x_coord, ycoord], d_inverse_diameters)
+    line = Line([0, 0], [reference_x_coord, ycoord], d_inverse_diameters)
     d_linear_lengths = line.get_points_on_line()
     # plt.plot(d_inverse_diameters, d_linear_lengths)
 
     # take only the section where the difference between the two lines is +ve
     difference = d_lengths - d_linear_lengths
     r_difference = np.where(difference > 0, difference, np.zeros_like(difference))
-    r_inverse_diameters = np.where(difference > 0, d_inverse_diameters, np.zeros_like(difference))
+    r_inverse_diameters = np.where(
+        difference > 0, d_inverse_diameters, np.zeros_like(difference)
+    )
 
     # find area between line and curve on both sides
     a_between = abs(np.trapz(r_difference, r_inverse_diameters))
@@ -161,20 +167,26 @@ def main():
     # find smallest detectable pipe index
     s_index = np.argmin(lengths) - 1
 
-    extrap_inverse_diam = inverse_diameters[s_index] - (lengths[s_index] * (inverse_diameters[s_index-1] \
-                          - inverse_diameters[s_index])/(lengths[s_index-1] - lengths[s_index] + 0.00001)+0.00001)
+    extrap_inverse_diam = inverse_diameters[s_index] - (
+        lengths[s_index]
+        * (inverse_diameters[s_index - 1] - inverse_diameters[s_index])
+        / (lengths[s_index - 1] - lengths[s_index] + 0.00001)
+        + 0.00001
+    )
 
     # set the biggest invisible pipe to whichever's smaller out of the extrapolated inverse diameter
     # or its usual inverse diameter.
     if inverse_diameters[s_index + 1] > extrap_inverse_diam:
         inverse_diameters[s_index + 1] = extrap_inverse_diam
 
-    lengths[s_index + 1:] = 0
+    lengths[s_index + 1 :] = 0
 
     # new grid
-    d_inverse_diameters = np.linspace(inverse_diameters[0], inverse_diameters[-1], int(1E4))
+    d_inverse_diameters = np.linspace(
+        inverse_diameters[0], inverse_diameters[-1], int(1e4)
+    )
 
-    # interpolate a denser resolution integral 
+    # interpolate a denser resolution integral
     interp = us(inverse_diameters, lengths, s=0, k=1)
     d_lengths = np.array(interp(d_inverse_diameters))
 
@@ -204,7 +216,7 @@ def main():
     # package up the best bisecting line coords and find the dimensions of
     # the rectangle which has the same integral and is also bisected by the line.
     # the sides are the characteristic resolution and the depth of field.
-    bisecting_coords = [[0,0], [reference_x_coord, y_min]]
+    bisecting_coords = [[0, 0], [reference_x_coord, y_min]]
     sides = rectSides(bisecting_coords, area)
 
     print(f"characteristic resolution: {np.round(1/sides[0], 3)}mm")
@@ -212,5 +224,6 @@ def main():
     print(f"Resolution integral: {np.round(area, 2)}")
 
     plotter(sides, d_inverse_diameters, d_lengths)
+
 
 main()

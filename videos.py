@@ -5,7 +5,7 @@ import csv
 from tqdm import tqdm
 
 
-class Video():
+class Video:
     def __init__(self, viddata):
         self.filenumber = viddata["filenumber"]
         self.filename = f"vid{self.filenumber}.mp4"
@@ -25,8 +25,6 @@ class Video():
         self.total_depth_pixels = self.roi[3]
         self.frame_count = int(self.cap.get(7))
         self.get_bkgd()
- 
-
 
     def get_profile(self, frame):
         """
@@ -35,22 +33,20 @@ class Video():
         """
         greyscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         r = self.roi
-        roi = greyscale[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
+        roi = greyscale[int(r[1]) : int(r[1] + r[3]), int(r[0]) : int(r[0] + r[2])]
         profile = np.average(list(roi), 1)
         return profile
-
-
 
     def get_bkgd(self):
         self.cap.set(1, self.frame_count - 10)
         ret, frame = self.cap.read()
         profile = self.get_profile(frame)
-        end_bkgd = profile[-int(len(profile) / 2):]
+        end_bkgd = profile[-int(len(profile) / 2) :]
 
         self.cap.set(1, 10)
         ret, frame = self.cap.read()
         profile = self.get_profile(frame)
-        start_bkgd = profile[:int(len(profile) / 2)]
+        start_bkgd = profile[: int(len(profile) / 2)]
 
         bkgd = np.concatenate((start_bkgd, end_bkgd))
 
@@ -65,8 +61,6 @@ class Video():
 
         self.bkgd = bkgd
         return bkgd
-
-
 
     def analyseFrame(self, index):
         self.cap.set(1, index)
@@ -84,7 +78,9 @@ class Video():
         trimmed_profile = profile[pixels_to_trim:-pixels_to_trim]
 
         # get the height of the peak
-        peak, props = find_peaks(trimmed_profile, distance=len(profile), width=(5, 70), height=(0, 5000))
+        peak, props = find_peaks(
+            trimmed_profile, distance=len(profile), width=(5, 70), height=(0, 5000)
+        )
         height_list = props["peak_heights"]
         width_list = props["widths"]
 
@@ -109,8 +105,6 @@ class Video():
 
         return width_cm, peak_depth_cm, peak_height
 
-
-
     def get_slice_thickness_data(self, resolution):
         widths = []
         depths = []
@@ -127,10 +121,8 @@ class Video():
         widths, depths, heights = self.trim_overlaps(widths, depths, peak_heights)
         return widths, depths, heights
 
-
-
     def trim_overlaps(self, widths, depths, heights):
-        width_diffs = np.sqrt(np.diff(widths)**2)
+        width_diffs = np.sqrt(np.diff(widths) ** 2)
         threshold = max(widths) / 5
         bad_indices = []
         for i, diff in enumerate(width_diffs):
@@ -157,8 +149,6 @@ class Video():
         heights = heights[mask2]
         return widths, depths, heights
 
-
-
     def save_slice_thickness_data(self, resolution, filepath):
         print(f"--> {filepath}")
         widths, depths, heights = self.get_slice_thickness_data(resolution)
@@ -170,27 +160,28 @@ class Video():
                 file.write(f"{line[0]},{line[1]},{line[2]}\n")
 
 
-
 def fetch_video_details(filepath, filenumber):
-        """Retrieve the depth from details.txt"""
-        with open(f"{filepath}/details.txt", "r") as file:
-            for line in csv.reader(file, delimiter="\t"):
-                if line[0] == filenumber:
-                    tdepth = float(line[2])
+    """Retrieve the depth from details.txt"""
+    with open(f"{filepath}/details.txt", "r") as file:
+        for line in csv.reader(file, delimiter="\t"):
+            if line[0] == filenumber:
+                tdepth = float(line[2])
 
-                    ROI_tuple = line[5].split(sep=",")
-                    ROI_list = list(map(int, ROI_tuple))
+                ROI_tuple = line[5].split(sep=",")
+                ROI_list = list(map(int, ROI_tuple))
 
-                    fdepth_tuple = line[4].split(sep=",")
-                    fdepth_list = list(map(float, fdepth_tuple))
+                fdepth_tuple = line[4].split(sep=",")
+                fdepth_list = list(map(float, fdepth_tuple))
 
-                    probe = line[1]
-                    
-                    freq = line[3]
-                    break
-        return {"video_number": filenumber,
-                "total_depth": tdepth,
-                "ROI": ROI_list,
-                "focus_depth": fdepth_list,
-                "probe": probe,
-                "frequency": freq}
+                probe = line[1]
+
+                freq = line[3]
+                break
+    return {
+        "video_number": filenumber,
+        "total_depth": tdepth,
+        "ROI": ROI_list,
+        "focus_depth": fdepth_list,
+        "probe": probe,
+        "frequency": freq,
+    }

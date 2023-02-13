@@ -7,7 +7,7 @@ from slice_thickness import extract_Ls
 reference_x_coord = 0.00002
 
 
-class Line():
+class Line:
     def __init__(self, point1, point2, xvals) -> None:
         self.point1 = point1
         self.point2 = point2
@@ -45,14 +45,16 @@ def bisectObjFunc(ycoord, args):
     lengths = args[2]
 
     # get straight line vals for all 1/D vals
-    line = Line([0,0], [reference_x_coord, ycoord], inverse_diameters)
+    line = Line([0, 0], [reference_x_coord, ycoord], inverse_diameters)
     d_linear_lengths = line.get_points_on_line()
     # plt.plot(inverse_diameters, d_linear_lengths)
 
     # take only the section where the difference between the two lines is +ve
     difference = lengths - d_linear_lengths
     r_difference = np.where(difference > 0, difference, np.zeros_like(difference))
-    r_inverse_diameters = np.where(difference > 0, inverse_diameters, np.zeros_like(difference))
+    r_inverse_diameters = np.where(
+        difference > 0, inverse_diameters, np.zeros_like(difference)
+    )
 
     # find area between line and curve on both sides
     a_between = abs(np.trapz(r_difference, r_inverse_diameters))
@@ -107,8 +109,8 @@ def calc_resolution_integral():
     # videos = [35,36,37,38]
     # videos = [68,69,70,71]
     # videos = [64,65,66,67]
-    videos = [78,79,80,81]
-    
+    videos = [78, 79, 80, 81]
+
     # choose inverse diameter range
     inv_diameters = np.linspace(0.01, 1.7, 400)
 
@@ -118,7 +120,9 @@ def calc_resolution_integral():
     # print(L_dict)
     # plt.scatter(diameters, lengths)
     # plt.show()
-    diameters = np.array(diameters)[::-1] / np.sqrt(np.cos(np.deg2rad(40))) # convert to effective diameter and reverse
+    diameters = np.array(diameters)[::-1] / np.sqrt(
+        np.cos(np.deg2rad(40))
+    )  # convert to effective diameter and reverse
     inverse_diameters = 1 / diameters
 
     lengths = np.array(lengths)[::-1]
@@ -143,7 +147,7 @@ def calc_resolution_integral():
     # package up the best bisecting line coords and find the dimensions of
     # the rectangle which has the same integral and is also bisected by the line.
     # the sides are the characteristic resolution and the depth of field.
-    bisecting_coords = [[0,0], [reference_x_coord, y_min]]
+    bisecting_coords = [[0, 0], [reference_x_coord, y_min]]
     sides = rectSides(bisecting_coords, area)
 
     print(f"characteristic resolution: {np.round(1/sides[0], 3)}mm")
@@ -153,7 +157,6 @@ def calc_resolution_integral():
     # print(inverse_diameters, lengths)
 
     plotter(sides, inverse_diameters, lengths)
-
 
 
 calc_resolution_integral()
