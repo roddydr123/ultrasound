@@ -3,7 +3,7 @@ from scipy.stats import pearsonr
 import numpy as np
 
 
-fig, ax = plt.subplots(figsize=(7,7))
+fig, ax = plt.subplots(figsize=(10,10))
 
 # ax.scatter([269.51, 242.77, 281.17, 273.81, 241.2, 248.91], [99, 105, 70, 94, 88, 99])   # old Rs
 # ax.scatter([0.349, 0.277, 0.121, 0.33, 0.514, 0.371],[1.21, 0.67, 0.75, 0.96, 1.97, 1.21]) # old Drs
@@ -26,15 +26,35 @@ label = ["Characteristic resolution", "(mm)"]
 # label = ["Depth of field", "(mm)"]
 # label = ["Resolution integral", ""]
 
-ax.scatter(data[0], data[1])
+dat = np.loadtxt("analysed/gen3/allRs.txt", delimiter="\t", skiprows=1, dtype=str)
 
-limit = np.max(np.array([ax.get_ylim(), ax.get_xlim()]))
+for probe in dat:
+    x = float(probe[4])
+    y = float(probe[3])
+    ax.scatter(x, y)
+    ax.annotate(f"{probe[0]}, {probe[1]}", (x, y))
 
-ax.set_xlim([0, 1.1 * limit])
-ax.set_ylim([0, 1.1 * limit])
+ax.set_xlim([0, ax.get_xlim()[1]])
+ax.set_ylim([0, ax.get_ylim()[1]])
 
-ax.set_xlabel(f"{label[0]} from ST {label[1]}")
-ax.set_ylabel(f"{label[0]} from EPP {label[1]}")
+# print(dat)
+xs = np.linspace(0, ax.get_xlim()[1], 100)
+ys25 = 25 * xs
+ys50 = 50 * xs
+ys75 = 75 * xs
+ax.plot(xs, ys25, "k--")
+ax.annotate("R = 25", (xs[-1], ys25[-1]))
+ax.plot(xs, ys50, "k--")
+ax.annotate("R = 50", (xs[-50], ys50[-50]))
+ax.plot(xs, ys75, "k--")
+ax.annotate("R = 75", (xs[-70], ys75[-70]))
+# ax.scatter(data[0], data[1])
 
-print(pearsonr(data[0], data[1]))
+# limit = np.max(np.array([ax.get_ylim(), ax.get_xlim()]))
+# ax.legend()
+
+ax.set_xlabel("Characteristic resolution (mm)")
+ax.set_ylabel("Depth of field (mm)")
+
+# print(pearsonr(data[0], data[1]))
 plt.show()
