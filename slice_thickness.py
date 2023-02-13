@@ -6,17 +6,19 @@ from itertools import pairwise
 from scipy.ndimage import gaussian_filter1d as gf1d
 from scipy.signal import find_peaks
 import sys
+import pathlib
 
 
-PATH = "/home/david/Documents/uni/year-5/ultrasound/"
+p = pathlib.Path(__file__).parents
+PATH = p[1]
 
 
 def get_slice_thickness(number):
     viddata = {
-               "filepath": f"{PATH}videos/", "filenumber": f"{number}"}
+               "filepath": f"{PATH}/videos/", "filenumber": f"{number}"}
     vid = Video(viddata)
 
-    vid.save_slice_thickness_data(5, f"{PATH}scripts/analysed/gen3/vid{viddata['filenumber']}.txt")
+    vid.save_slice_thickness_data(5, f"{PATH}/scripts/analysed/gen3/vid{viddata['filenumber']}.txt")
 
 
 

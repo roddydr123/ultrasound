@@ -1,13 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
-from scipy.ndimage import gaussian_filter1d as gf1d
 from videos import fetch_video_details
 from slice_thickness import process_raw_video_data
+import pathlib
 
 
-PATH = "/home/david/Documents/uni/year-5/ultrasound/scripts/analysed/gen3/"
-PATH_TO_DETAILS = "/home/david/Documents/uni/year-5/ultrasound/videos/"
+p = pathlib.Path(__file__).parents
+parentpath = p[1]
+
+PATH = f"{parentpath}/scripts/analysed/gen3/"
+PATH_TO_DETAILS = f"{parentpath}/videos/"
 
 
 def plotter(data, title, details_list):
