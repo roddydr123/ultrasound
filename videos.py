@@ -14,14 +14,8 @@ class Video:
         self.start_deep = True
         deets = fetch_video_details(self.filepath, self.filenumber)
         self.total_depth_cm = deets["total_depth"]
-        ROI_list = deets["ROI"]
         self.cap = cv2.VideoCapture(self.filepath + self.filename)
-        try:
-            # get the ROI passed as an argument, but if there isn't one
-            # then get it from file.
-            self.roi = viddata["roi"]
-        except KeyError:
-            self.roi = ROI_list
+        self.roi = deets["ROI"]
         self.total_depth_pixels = self.roi[3]
         self.frame_count = int(self.cap.get(7))
         self.get_bkgd()
