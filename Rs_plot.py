@@ -5,19 +5,22 @@ import numpy as np
 
 fig, ax = plt.subplots(figsize=(10, 10))
 
-# gen 3
-data = [
-    [2.956, 3.027, 3.062, 1.549, 1.53, 2.536, 2.435, 4.627, 1.652, 1.46, 5.346, 3.37],
-    [0.96, 0.96, 0.67, 0.75, 0.75, 0.96, 0.96, 1.97, 0.779, 0.779, 2.269, 2.564],
-]
-
 dat = np.loadtxt("analysed/gen3/allRs.txt", delimiter="\t", skiprows=1, dtype=str)
 
+moran_dat = np.loadtxt("other_data/moran.txt", delimiter="\t", skiprows=1, dtype=str)
+
 for probe in dat:
+    if probe[1] != "EPP":
+        x = float(probe[4])
+        y = float(probe[3])
+        ax.scatter(x, y)
+        ax.annotate(f"{probe[0]}, {probe[1]}", (x, y))
+
+for probe in moran_dat:
     x = float(probe[4])
     y = float(probe[3])
     ax.scatter(x, y)
-    ax.annotate(f"{probe[0]}, {probe[1]}", (x, y))
+    ax.annotate(f"{probe[0]}", (x, y))
 
 ax.set_xlim([0, ax.get_xlim()[1]])
 ax.set_ylim([0, ax.get_ylim()[1]])
