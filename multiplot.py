@@ -15,7 +15,7 @@ PATH_TO_DETAILS = f"{parentpath}/videos/"
 
 def plotter(data, title, details_list):
     fig, ax = plt.subplots(figsize=(14, 10))
-    newax = ax.twinx()
+    # newax = ax.twinx()
     for i, dataset in enumerate(data):
         # order data to be deeper monotonically.
         ind = np.argsort(dataset[0])
@@ -26,13 +26,13 @@ def plotter(data, title, details_list):
         # smooth the line and plot it.
         ax.plot(x, y, label=details_list[i])
         # newax.plot(x, h, "r")
-    ax.set_xlabel("Depth/cm")
+    ax.set_xlabel("Depth/mm")
     ax.set_ylabel("Slice thickness/mm")
     ax.legend()
     xlims = ax.get_xlim()
     ax.set_xlim(0, xlims[1])
     ax.set_ylim(0, ax.get_ylim()[1])
-    newax.set_ylim(0, newax.get_ylim()[1])
+    # newax.set_ylim(0, newax.get_ylim()[1])
     ax.yaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
     plt.show()
