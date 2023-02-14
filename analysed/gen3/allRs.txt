@@ -3,7 +3,7 @@ probe	note	Resolution integral	Depth of field	Characteristic resolution
 6C1	EPP	69.97	179.41	2.564
 4C1	ST	23.09	123.46	5.346
 4C1	EPP	73.82	167.5	2.269
-18L6	ST1	29.3	48.42	1.652
+18L6	ST1	29.74	48.78	1.64
 18L6	ST2	28.16	41.1	1.46
 18L6	EPP	65.98	51.37	0.779
 C15	ST	28.96	134.01	4.627
