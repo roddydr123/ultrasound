@@ -5,9 +5,9 @@ import numpy as np
 plt.style.use("thesis.mplstyle")
 
 
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(10, 7))
 
-dat = np.loadtxt("analysed/gen3/allRs.txt", delimiter="\t", skiprows=1, dtype=str)
+dat = np.loadtxt("analysed/gen3/reduced_Rs.txt", delimiter="\t", skiprows=1, dtype=str)
 dat_xs = []
 dat_ys = []
 
@@ -50,13 +50,13 @@ ax.set_ylim([0, ax.get_ylim()[1]])
 xs = np.linspace(0, ax.get_xlim()[1], 100)
 ys25 = 25 * xs
 ys50 = 50 * xs
-ys75 = 75 * xs
-ax.plot(xs, ys25, "k--")
+ys12 = 12.5 * xs
+ax.plot(xs, ys25, "k-")
 ax.annotate("R = 25", (xs[-20] + 0.1, ys25[-20]), fontsize="large")
-ax.plot(xs, ys50, "k-")
+ax.plot(xs, ys50, "k--")
 ax.annotate("R = 50", (xs[-55] + 0.07, ys50[-55]), fontsize="large")
-ax.plot(xs, ys75, "k--")
-ax.annotate("R = 75", (xs[-70] + 0.05, ys75[-70]), fontsize="large")
+ax.plot(xs, ys12, "k--")
+ax.annotate("R = 12.5", (xs[-20], ys12[-20]-3), fontsize="large")
 
 ax.set_xlabel("Characteristic resolution (mm)")
 ax.set_ylabel("Depth of field (mm)")
