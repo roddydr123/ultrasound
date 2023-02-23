@@ -229,7 +229,7 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
         final_diameters.append(diameter)
 
     # append the LCP and infinity
-    L_list.append(np.max(LCPs))
+    L_list.append(np.max(LCPs) - np.min(LCPs))
     final_diameters.append(np.inf)
 
     return L_dict, L_list, final_diameters
