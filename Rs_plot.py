@@ -7,7 +7,8 @@ plt.style.use("thesis.mplstyle")
 
 fig, ax = plt.subplots(figsize=(10, 7))
 
-dat = np.loadtxt("analysed/gen3/reduced_Rs.txt", delimiter="\t", skiprows=1, dtype=str)
+# dat = np.loadtxt("analysed/gen3/reduced_Rs.txt", delimiter="\t", skiprows=1, dtype=str)
+dat = np.loadtxt("analysed/gen3/auto_res_check.txt", delimiter=",", dtype=str)
 dat_xs = []
 dat_ys = []
 
@@ -25,7 +26,7 @@ for probe in dat:
         y = float(probe[3])
         dat_xs.append(x)
         dat_ys.append(y)
-        ax.annotate(f"{probe[0]}", (x + 0.04, y))
+        ax.annotate(f"{probe[0][1:-1]}", (x + 0.04, y))
 ax.scatter(dat_xs, dat_ys, label="Slice thickness measurements")
 
 for probe in moran_dat:

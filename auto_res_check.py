@@ -45,19 +45,19 @@ def bisectObjFunc(ycoord, args):
     """
 
     area_curve = args[0]
-    d_inverse_diameters = args[1]
-    d_lengths = args[2]
+    inverse_diameters = args[1]
+    lengths = args[2]
 
     # get straight line vals for all 1/D vals
-    line = Line([0, 0], [reference_x_coord, ycoord], d_inverse_diameters)
+    line = Line([0, 0], [reference_x_coord, ycoord], inverse_diameters)
     d_linear_lengths = line.get_points_on_line()
-    # plt.plot(d_inverse_diameters, d_linear_lengths)
+    # plt.plot(inverse_diameters, d_linear_lengths)
 
     # take only the section where the difference between the two lines is +ve
-    difference = d_lengths - d_linear_lengths
+    difference = lengths - d_linear_lengths
     r_difference = np.where(difference > 0, difference, np.zeros_like(difference))
     r_inverse_diameters = np.where(
-        difference > 0, d_inverse_diameters, np.zeros_like(difference)
+        difference > 0, inverse_diameters, np.zeros_like(difference)
     )
 
     # find area between line and curve on both sides
@@ -82,12 +82,12 @@ def rectSides(bisecting_coords, curve_area):
     return [x_side, y_side]
 
 
-def plotter(sides, d_inverse_diameters, d_lengths):
+def plotter(sides, inverse_diameters, lengths):
 
     fig, ax = plt.subplots()
     ax.scatter(sides[0], sides[1], c="k", marker="x")
 
-    ax.plot(d_inverse_diameters, d_lengths)
+    ax.plot(inverse_diameters, lengths)
     ax.set_xlabel("$\\alpha$ (1/mm)")
     ax.set_ylabel("Lr (mm)")
 
@@ -122,20 +122,20 @@ def calc_R(lengths, inverse_diameters, show=True):
 
     lengths[s_index + 1 :] = 0
 
-    # new grid
-    d_inverse_diameters = np.linspace(
-        inverse_diameters[0], inverse_diameters[-1], int(1e4)
-    )
+    # # new grid
+    # inverse_diameters = np.linspace(
+    #     inverse_diameters[0], inverse_diameters[-1], int(1e4)
+    # )
 
-    # interpolate a denser resolution integral
-    interp = us(inverse_diameters, lengths, s=0, k=1)
-    d_lengths = np.array(interp(d_inverse_diameters))
+    # # interpolate a denser resolution integral
+    # interp = us(inverse_diameters, lengths, s=0, k=1)
+    # lengths = np.array(interp(inverse_diameters))
 
     # make sure the splines arent bouncing around in the negatives or coming back from 0.
-    negative = np.where(d_lengths >= 0, d_lengths, np.zeros_like(d_lengths))
+    negative = np.where(lengths >= 0, lengths, np.zeros_like(lengths))
     first_zero = np.argmin(negative)
     negative[first_zero:] = 0
-    d_lengths = negative
+    lengths = negative
 
     # find the area under the curve (the resolution integral)
     area = abs(np.trapz(lengths, inverse_diameters))
@@ -149,7 +149,7 @@ def calc_R(lengths, inverse_diameters, show=True):
     # resolution integral.
     n_bs = []
     for i in ycoord_range:
-        n_bs.append(bisectObjFunc(i, [area, d_inverse_diameters, d_lengths]))
+        n_bs.append(bisectObjFunc(i, [area, inverse_diameters, lengths]))
 
     # find the y coordinate which gives the smallest non_bisectionality
     y_min = ycoord_range[np.argmin(n_bs)]
@@ -164,24 +164,24 @@ def calc_R(lengths, inverse_diameters, show=True):
     depth_field = np.round(sides[1], 2)
     R = np.round(area, 2)
 
-    print(f"characteristic resolution: {char_res} mm")
-    print(f"depth of field: {depth_field} mm")
-    print(f"Resolution integral: {R}")
-
     if show is True:
+        print(f"characteristic resolution: {char_res} mm")
+        print(f"depth of field: {depth_field} mm")
+        print(f"Resolution integral: {R}")
         plotter(sides, inverse_diameters, lengths)
     return char_res, depth_field, R
 
 
 def setup():
-    # videos = ["58", "59", "62", "63"]
+    videos = ["58", "59", "62", "63"]
     # videos = ["27", "28", "29", "30"]
     # videos = ["01", "04"]
     # videos = [25,26,31,32]
-    videos = [35,36,37,38] # 18L6 first go
+    # videos = [35,36,37,38] # 18L6 first go
     # videos = [68,69,70,71] # 18L6 diff probe
     # videos = [64,65,66,67]
     # videos = [78, 79, 80, 81]
+    videos = [50, 51, 56, 57]
 
     # choose inverse diameter range
     inv_diameters = np.linspace(0.01, 1.7, 400)
@@ -198,5 +198,66 @@ def setup():
     calc_R(lengths, inverse_diameters)
 
 
+def all_vids():
+    videos = [
+    ["58", "59", "62", "63"], # 14L-5
+    [60, 61, 62, 63],   # 14L-5
+    ["27", "28", "29", "30"], # 9L
+    ["01", "04"], # 9L
+    [25,26,31,32],  # C15
+    [35,36,37,38],  # 18L6
+    [68,69,70,71],  # 18L6
+    [64,65,66,67],  # 4C1
+    [78, 79, 80, 81],   # 6C1
+    [21,22,23,24],  # 9L4
+    [72,73,74,75],  #9L4
+    [50, 51, 56, 57] # ML6-15
+    ]
+
+    names = ["14L-5", "14L-5", "9L", "9L", "C1-5", "18L-6", "18L-6", "4C1", "6C1", "9L4", "9L4", "ML6-15"]
+
+    inv_diameters = np.linspace(0.01, 1.7, 400)
+
+    pipe_diameters = 1 / inv_diameters[::-1]
+
+    vals = []
+    # to_be_averaged = [1, 3]
+
+    for i, video in enumerate(videos):
+        print(names[i])
+
+        if i == 1 or i == 3:
+            continue
+
+        L_dict, lengths, diameters = extract_Ls(video, pipe_diameters, 20, 3)
+
+        diameters = np.array(diameters)[::-1]
+        inverse_diameters = 1 / diameters
+
+        lengths = np.array(lengths)[::-1]
+
+        data = calc_R(lengths, inverse_diameters, show=False)
+
+        # specially for averaging 9L and 14L5
+        if i == 0 or i == 2:
+            L_dict, lengths, diameters = extract_Ls(videos[i+1], pipe_diameters, 20, 3)
+
+            diameters = np.array(diameters)[::-1]
+            inverse_diameters = 1 / diameters
+
+            lengths = np.array(lengths)[::-1]
+
+            data2 = calc_R(lengths, inverse_diameters, show=False)
+
+            data = np.average((data, data2), axis=0)
+        # print(vals)
+        vals.append([names[i], "ST", data[2], data[1], data[0]])
+    # print(vals)
+    with open("analysed/gen3/auto_res_check.txt", "w") as f:
+        for line in vals:
+            f.write(str(line)[1:-1] + "\n")
+
+
 if __name__=="__main__":
-    setup()
+    all_vids()
+    # setup()
