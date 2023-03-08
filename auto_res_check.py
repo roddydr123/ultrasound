@@ -4,7 +4,6 @@ made with an ultrasound machine and Edinburgh Pipe Phantom (EPP).
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import UnivariateSpline as us
 from slice_thickness import extract_Ls
 
 
@@ -250,9 +249,9 @@ def all_vids():
             data2 = calc_R(lengths, inverse_diameters, show=False)
 
             data = np.average((data, data2), axis=0)
-        # print(vals)
+
         vals.append([names[i], "ST", data[2], data[1], data[0]])
-    # print(vals)
+
     with open("analysed/gen3/auto_res_check.txt", "w") as f:
         for line in vals:
             f.write(str(line)[1:-1] + "\n")
