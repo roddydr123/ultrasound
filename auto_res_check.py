@@ -5,6 +5,7 @@ made with an ultrasound machine and Edinburgh Pipe Phantom (EPP).
 import numpy as np
 import matplotlib.pyplot as plt
 from slice_thickness import extract_Ls
+from scipy.interpolate import UnivariateSpline as us
 
 
 reference_x_coord = 0.00002
@@ -121,20 +122,14 @@ def calc_R(lengths, inverse_diameters, show=True):
 
     lengths[s_index + 1 :] = 0
 
-    # # new grid
-    # inverse_diameters = np.linspace(
-    #     inverse_diameters[0], inverse_diameters[-1], int(1e4)
-    # )
+    # new grid
+    d_inverse_diameters = np.linspace(
+        inverse_diameters[0], inverse_diameters[-1], int(1e4)
+    )
 
-    # # interpolate a denser resolution integral
-    # interp = us(inverse_diameters, lengths, s=0, k=1)
-    # lengths = np.array(interp(inverse_diameters))
-
-    # make sure the splines arent bouncing around in the negatives or coming back from 0.
-    # negative = np.where(lengths >= 0, lengths, np.zeros_like(lengths))
-    # first_zero = np.argmin(negative)
-    # negative[first_zero:] = 0
-    # lengths = negative
+    # interpolate a denser resolution integral
+    interp = us(inverse_diameters, lengths, s=0, k=1)
+    d_lengths = np.array(interp(d_inverse_diameters))
 
     # find the area under the curve (the resolution integral)
     area = abs(np.trapz(lengths, inverse_diameters))
@@ -148,7 +143,7 @@ def calc_R(lengths, inverse_diameters, show=True):
     # resolution integral.
     n_bs = []
     for i in ycoord_range:
-        n_bs.append(bisectObjFunc(i, [area, inverse_diameters, lengths]))
+        n_bs.append(bisectObjFunc(i, [area, d_inverse_diameters, d_lengths]))
 
     # find the y coordinate which gives the smallest non_bisectionality
     y_min = ycoord_range[np.argmin(n_bs)]
