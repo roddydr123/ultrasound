@@ -131,10 +131,10 @@ def calc_R(lengths, inverse_diameters, show=True):
     # lengths = np.array(interp(inverse_diameters))
 
     # make sure the splines arent bouncing around in the negatives or coming back from 0.
-    negative = np.where(lengths >= 0, lengths, np.zeros_like(lengths))
-    first_zero = np.argmin(negative)
-    negative[first_zero:] = 0
-    lengths = negative
+    # negative = np.where(lengths >= 0, lengths, np.zeros_like(lengths))
+    # first_zero = np.argmin(negative)
+    # negative[first_zero:] = 0
+    # lengths = negative
 
     # find the area under the curve (the resolution integral)
     area = abs(np.trapz(lengths, inverse_diameters))
