@@ -6,9 +6,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from slice_thickness import extract_Ls
 from scipy.interpolate import UnivariateSpline as us
+from scipy.optimize import minimize_scalar
 
 
-reference_x_coord = 0.00002
+reference_x_coord = 0.1
 
 
 class Line:
@@ -100,6 +101,22 @@ def plotter(sides, inverse_diameters, lengths):
     plt.show()
 
 
+def optimisation_fn(m,alpha,L,R): # m is the gradient of bisector
+    difference = L-m*alpha # L(alpha) minus diagonal line
+    crossing_index = np.where(difference < 0)[0][0] -1 # crossing point of lines
+    area = np.trapz(difference[:crossing_index],alpha[:crossing_index]) # should be equal to 0.5 R
+    return np.abs(0.5*R-area) 
+    
+def res_int(alpha,linear): # Calculate R, Lr, Dr from alpha axis and L as linearly interpolated function
+    L = linear #(alpha)
+    R = np.trapz(L,alpha)
+    grad = minimize_scalar(optimisation_fn,args=(alpha,L,R), method='Bounded',bounds=(0.001,1000)).x
+    #plt.plot(alpha,[grad*x for x in alpha])
+    D_R = np.sqrt(grad/R)               # Characteristic Resolution
+    L_R = np.sqrt(grad*R)               # Depth of Field
+    return R, L_R, D_R
+
+
 def calc_R(lengths, inverse_diameters, show=True):
 
     # extrapolate to x axis and close integral
@@ -137,7 +154,7 @@ def calc_R(lengths, inverse_diameters, show=True):
     # bisecting lines are parametrised by the y coordinate of a point at
     # reference_x_coord. This variable sets the range of y coords which
     # are explored.
-    ycoord_range = np.linspace(0, 5, 12500)
+    ycoord_range = np.linspace(0, 10, 40000)
 
     # go through each bisecting line and find how well it bisects the
     # resolution integral.
