@@ -5,8 +5,8 @@ made with an ultrasound machine and Edinburgh Pipe Phantom (EPP).
 import numpy as np
 import matplotlib.pyplot as plt
 from slice_thickness import extract_Ls
-from scipy.interpolate import UnivariateSpline as us
 from scipy.optimize import minimize_scalar
+from scipy.interpolate import interp1d
 
 
 reference_x_coord = 0.01
@@ -125,15 +125,15 @@ def calc_R(lengths, inverse_diameters, show=True):
     )
 
     # interpolate a denser resolution integral
-    interp = us(inverse_diameters, lengths, s=0, k=1)
+    interp = interp1d(inverse_diameters, lengths)
     d_lengths = np.array(interp(d_inverse_diameters))
 
     # find the area under the curve (the resolution integral)
     area = abs(np.trapz(lengths, inverse_diameters))
 
-    grad = minimize_scalar(bisectObjFunc, args=(area,d_inverse_diameters,d_lengths), method='Bounded', bounds=(0.001, 1000))
+    res = minimize_scalar(bisectObjFunc, args=(area,d_inverse_diameters,d_lengths), method='Bounded', bounds=(0.001, 1000))
 
-    y_min = grad.x
+    y_min = res.x
 
     # package up the best bisecting line coords and find the dimensions of
     # the rectangle which has the same integral and is also bisected by the line.
