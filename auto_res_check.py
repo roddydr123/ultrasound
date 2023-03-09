@@ -9,7 +9,7 @@ from scipy.interpolate import UnivariateSpline as us
 from scipy.optimize import minimize_scalar
 
 
-reference_x_coord = 0.1
+reference_x_coord = 0.01
 
 
 class Line:
@@ -44,10 +44,6 @@ def bisectObjFunc(ycoord, area_curve, inverse_diameters, lengths):
     """
     Finds a line which bisects the integral area.
     """
-
-    # area_curve = args[0]
-    # inverse_diameters = args[1]
-    # lengths = args[2]
 
     # get straight line vals for all 1/D vals
     line = Line([0, 0], [reference_x_coord, ycoord], inverse_diameters)
@@ -101,22 +97,6 @@ def plotter(sides, inverse_diameters, lengths):
     plt.show()
 
 
-def optimisation_fn(m,alpha,L,R): # m is the gradient of bisector
-    difference = L-m*alpha # L(alpha) minus diagonal line
-    crossing_index = np.where(difference < 0)[0][0] -1 # crossing point of lines
-    area = np.trapz(difference[:crossing_index],alpha[:crossing_index]) # should be equal to 0.5 R
-    return np.abs(0.5*R-area) 
-    
-def res_int(alpha,linear): # Calculate R, Lr, Dr from alpha axis and L as linearly interpolated function
-    L = linear #(alpha)
-    R = np.trapz(L,alpha)
-    grad = minimize_scalar(optimisation_fn,args=(alpha,L,R), method='Bounded',bounds=(0.001,1000)).x
-    #plt.plot(alpha,[grad*x for x in alpha])
-    D_R = np.sqrt(grad/R)               # Characteristic Resolution
-    L_R = np.sqrt(grad*R)               # Depth of Field
-    return R, L_R, D_R
-
-
 def calc_R(lengths, inverse_diameters, show=True):
 
     # extrapolate to x axis and close integral
@@ -151,21 +131,8 @@ def calc_R(lengths, inverse_diameters, show=True):
     # find the area under the curve (the resolution integral)
     area = abs(np.trapz(lengths, inverse_diameters))
 
-    grad = minimize_scalar(bisectObjFunc, args=(area,d_inverse_diameters,d_lengths), method='Bounded',bounds=(0.001,1000))
+    grad = minimize_scalar(bisectObjFunc, args=(area,d_inverse_diameters,d_lengths), method='Bounded', bounds=(0.001, 1000))
 
-    # bisecting lines are parametrised by the y coordinate of a point at
-    # # reference_x_coord. This variable sets the range of y coords which
-    # # are explored.
-    # ycoord_range = np.linspace(0, 10, 40000)
-
-    # # go through each bisecting line and find how well it bisects the
-    # # resolution integral.
-    # n_bs = []
-    # for i in ycoord_range:
-    #     n_bs.append(bisectObjFunc(i, [area, d_inverse_diameters, d_lengths]))
-
-    # # find the y coordinate which gives the smallest non_bisectionality
-    # y_min = ycoord_range[np.argmin(n_bs)]
     y_min = grad.x
 
     # package up the best bisecting line coords and find the dimensions of
