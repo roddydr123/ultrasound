@@ -40,14 +40,14 @@ class Line:
         return (m * x) + c
 
 
-def bisectObjFunc(ycoord, args):
+def bisectObjFunc(ycoord, area_curve, inverse_diameters, lengths):
     """
     Finds a line which bisects the integral area.
     """
 
-    area_curve = args[0]
-    inverse_diameters = args[1]
-    lengths = args[2]
+    # area_curve = args[0]
+    # inverse_diameters = args[1]
+    # lengths = args[2]
 
     # get straight line vals for all 1/D vals
     line = Line([0, 0], [reference_x_coord, ycoord], inverse_diameters)
@@ -151,19 +151,22 @@ def calc_R(lengths, inverse_diameters, show=True):
     # find the area under the curve (the resolution integral)
     area = abs(np.trapz(lengths, inverse_diameters))
 
+    grad = minimize_scalar(bisectObjFunc, args=(area,d_inverse_diameters,d_lengths), method='Bounded',bounds=(0.001,1000))
+
     # bisecting lines are parametrised by the y coordinate of a point at
-    # reference_x_coord. This variable sets the range of y coords which
-    # are explored.
-    ycoord_range = np.linspace(0, 10, 40000)
+    # # reference_x_coord. This variable sets the range of y coords which
+    # # are explored.
+    # ycoord_range = np.linspace(0, 10, 40000)
 
-    # go through each bisecting line and find how well it bisects the
-    # resolution integral.
-    n_bs = []
-    for i in ycoord_range:
-        n_bs.append(bisectObjFunc(i, [area, d_inverse_diameters, d_lengths]))
+    # # go through each bisecting line and find how well it bisects the
+    # # resolution integral.
+    # n_bs = []
+    # for i in ycoord_range:
+    #     n_bs.append(bisectObjFunc(i, [area, d_inverse_diameters, d_lengths]))
 
-    # find the y coordinate which gives the smallest non_bisectionality
-    y_min = ycoord_range[np.argmin(n_bs)]
+    # # find the y coordinate which gives the smallest non_bisectionality
+    # y_min = ycoord_range[np.argmin(n_bs)]
+    y_min = grad.x
 
     # package up the best bisecting line coords and find the dimensions of
     # the rectangle which has the same integral and is also bisected by the line.
