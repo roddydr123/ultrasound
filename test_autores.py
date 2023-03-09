@@ -5,35 +5,6 @@ import matplotlib.pyplot as plt
 from scipy.stats import linregress
 
 
-# def test_autores_check_C14():
-#     lengths = [0, 0, 0, 0, 0, 22.9, 72.6, 108, 148, 197, 201, 233]  # 4C1 NHS folder
-#     diameters = np.array(
-#         [0.3, 0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf]
-#     )  # NHS data lab folder
-
-#     diameters = np.array(diameters)[::-1] / np.sqrt(
-#     np.cos(np.deg2rad(40))
-#     )  # convert to effective diameter and reverse
-
-#     inverse_diameters = 1 / diameters
-#     lengths = np.array(lengths)[::-1]
-#     assert calc_R(lengths, inverse_diameters, show=False) == (2.269, 167.5, 73.82)
-
-
-# def test_autores_check_14L5():
-#     lengths = [0.0, 2.0, 10.8, 22.7, 39.6, 44.9, 57.0, 65.8, 69.3, 72.5, 75.8, 76.8]
-#     diameters = np.array(
-#         [0.3, 0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf]
-#     )  # NHS data lab folder
-
-#     diameters = np.array(diameters)[::-1] / np.sqrt(
-#     np.cos(np.deg2rad(40))
-#     )  # convert to effective diameter and reverse
-
-#     inverse_diameters = 1 / diameters
-#     lengths = np.array(lengths)[::-1]
-#     assert calc_R(lengths, inverse_diameters, show=False) == (0.75, 52, 70)
-
 def clac_rrr(lengths, diameters):
     diameters = np.array(diameters)[::-1] / np.sqrt(
     np.cos(np.deg2rad(40))
@@ -41,6 +12,7 @@ def clac_rrr(lengths, diameters):
 
     inverse_diameters = 1 / diameters
     lengths = np.array(lengths)[::-1]
+    # return res_int(inverse_diameters, lengths)
     return calc_R(lengths, inverse_diameters, show=False)
 
 s_diameters = [0.35,0.42,0.56,0.70,1.0,1.5,2.0,3.0,4.0,6.0,7.9,np.inf] # for spreadsheet
@@ -95,18 +67,21 @@ NHS_results = np.array([[70,52,0.75],
                         [68,48,0.71],
                         [70,179,2.56],
                         [73.5, 167, 2.27],
-                        [88,163,1.97]])
+                        [83,163,1.97]])
     
 
 EPP_ = []
 ST_ = []
 percent_difference = []
 
-for diameters, lens, results in zip(all_diameters[:-1], lengths[:-1], NHS_results[:-1]):
+num1 = 2
+num2 = 0
+
+for diameters, lens, results in zip(all_diameters, lengths, NHS_results):
     ST_results = clac_rrr(lens, diameters)
-    EPP_.append(results[2])
-    ST_.append(ST_results[0])
-    percent_difference.append(abs(results[2] - ST_results[0]) * 100 / results[2])
+    EPP_.append(results[num1])
+    ST_.append(ST_results[num2])
+    percent_difference.append(abs(results[num1] - ST_results[num2]) * 100 / results[num1])
 
 result = linregress(EPP_, ST_)
 print(result)
@@ -117,4 +92,6 @@ print(f"std of percentage difference: {np.std(percent_difference)}")
 print(f"maximum percentage difference: {np.max(percent_difference)}")
 
 plt.scatter(EPP_, ST_)
+plt.xlabel("EPP")
+plt.ylabel("ST")
 plt.show()
