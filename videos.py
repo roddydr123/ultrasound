@@ -3,6 +3,7 @@ import numpy as np
 from scipy.signal import find_peaks
 import csv
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 
 class Video:
@@ -64,6 +65,8 @@ class Video:
             return 0, 0, 0
         profile = self.get_profile(frame)
         profile -= self.bkgd
+
+        profile[profile < 0] = 0
 
         # exclude very start and very end from peak finder since these often have reflections.
         # works by cutting 20 pixels from the top and bottom of the ROI before finding peaks, then
