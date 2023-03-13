@@ -241,7 +241,9 @@ def main():
     elif sys.argv[1] == "L":
         extract_Ls(sys.argv[2], sys.argv[3])
     elif sys.argv[1] == "all":
-        videos = [8, 19, 47, 53, 60, 66, 82, 84, 89]  # np.arange(23, 90, 1)
+        videos = [27,28,29,30,50,51,56,57,60,61,62,63,21,
+                  22,23,24,72,73,74,75,25,26,31,32,35,36,
+                  37,38,68,69,70,71,64,65,66,67,78,79,80,81]
         for video in videos:
             n = str(video).zfill(2)
             try:
