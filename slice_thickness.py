@@ -136,7 +136,7 @@ def process_raw_video_data(dataset, threshold, smoothing_factor):
     return reduced_depths, reduced_st, reduced_pixel_values, dead_zone, LCP
 
 
-def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
+def extract_Ls(required_videos:list, pipe_diameters:np.ndarray, threshold:float, smoothing_factor:int, aug=0.0):
     """Takes in videos for a probe and finds the depth range for which a series of
     slice thicknesses are larger.
     """
@@ -159,7 +159,7 @@ def extract_Ls(required_videos, pipe_diameters, threshold, smoothing_factor):
             LCP,
         ) = process_raw_video_data(dataset, threshold, smoothing_factor)
 
-        vid_arrays.append([reduced_depths, reduced_st])
+        vid_arrays.append([reduced_depths, reduced_st + (aug * reduced_st)])
         LCPs.append([dead_zone, LCP])
 
     """
