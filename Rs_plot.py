@@ -5,6 +5,14 @@ import numpy as np
 plt.style.use("thesis.mplstyle")
 
 
+def profiles():
+    neames = [400, 600, 800, 1000, 1200]
+    for file in neames:
+        data = np.loadtxt(f"analysed/width_expt/27-{file}.txt").T
+        plt.plot(data[0], data[1])
+    plt.show()
+
+
 
 def EPP_plot():
     epp_dat = np.loadtxt("analysed/gen3/EPP_data.txt", delimiter="\t", dtype=str)
@@ -102,4 +110,5 @@ def R_plot():
 
 
 # R_plot()
-EPP_plot()
+# EPP_plot()
+profiles()
