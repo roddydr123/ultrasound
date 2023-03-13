@@ -4,6 +4,7 @@ from scipy.signal import find_peaks
 import csv
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import gc
 
 
 class Video:
@@ -73,6 +74,7 @@ class Video:
         # add 20 to all the peak locations.
         pixels_to_trim = 20
         trimmed_profile = profile[pixels_to_trim:-pixels_to_trim]
+        pixels_to_trim += 1
 
         # get the height of the peak
         peak, props = find_peaks(
@@ -99,6 +101,18 @@ class Video:
         scf = 0.94
         width_cm *= scf
         peak_depth_cm *= scf
+
+        if index == 400:
+            x = np.linspace(0, self.total_depth_cm * scf, len(profile))
+            plt.plot(x, profile)
+
+            plt.plot(peak_depth_cm, peak_height, "x")
+
+            plt.vlines(x=peak_depth_cm, ymin=peak_height - props["prominences"], ymax = peak_height, color = "C1")
+
+            plt.hlines(y=props["width_heights"], xmin=(props["left_ips"] + pixels_to_trim) * conv_factor * scf, xmax=(props["right_ips"] + pixels_to_trim) * conv_factor * scf, color = "C1")
+            gc.collect()
+            plt.show()
 
         return width_cm, peak_depth_cm, peak_height
 

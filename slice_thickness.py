@@ -17,7 +17,7 @@ def get_slice_thickness(number):
     vid = Video(viddata)
 
     vid.save_slice_thickness_data(
-        5, f"{PATH}/scripts/analysed/gen3/vid{viddata['filenumber']}.txt"
+        5, f"{PATH}/scripts/analysed/width_expt/vid{viddata['filenumber']}.txt"
     )
 
 
