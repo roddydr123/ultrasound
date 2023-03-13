@@ -102,17 +102,20 @@ class Video:
         width_cm *= scf
         peak_depth_cm *= scf
 
-        if index == 400:
-            x = np.linspace(0, self.total_depth_cm * scf, len(profile))
-            plt.plot(x, profile)
+        # if index % 200 == 0:
+        #     x = np.linspace(0, self.total_depth_cm * scf, len(profile))
+        #     tosave = np.array([x, profile]).T
+        #     np.savetxt(f"analysed/width_expt/27-{index}.txt", tosave)
+        #     x = np.linspace(0, self.total_depth_cm * scf, len(profile))
+        #     plt.plot(x, profile)
 
-            plt.plot(peak_depth_cm, peak_height, "x")
+        #     plt.plot(peak_depth_cm, peak_height, "x")
 
-            plt.vlines(x=peak_depth_cm, ymin=peak_height - props["prominences"], ymax = peak_height, color = "C1")
+        #     plt.vlines(x=peak_depth_cm, ymin=peak_height - props["prominences"], ymax = peak_height, color = "C1")
 
-            plt.hlines(y=props["width_heights"], xmin=(props["left_ips"] + pixels_to_trim) * conv_factor * scf, xmax=(props["right_ips"] + pixels_to_trim) * conv_factor * scf, color = "C1")
-            gc.collect()
-            plt.show()
+        #     plt.hlines(y=props["width_heights"], xmin=(props["left_ips"] + pixels_to_trim) * conv_factor * scf,
+        #                xmax=(props["right_ips"] + pixels_to_trim) * conv_factor * scf, color = "C1")
+        #     plt.show()
 
         return width_cm, peak_depth_cm, peak_height
 
