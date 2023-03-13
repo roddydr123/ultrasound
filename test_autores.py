@@ -2,8 +2,11 @@
 import numpy as np
 from auto_res_check import calc_R
 import matplotlib.pyplot as plt
+# import matplotlib
 from scipy.stats import linregress
 from utils import read_from_excel
+
+plt.style.use("thesis.mplstyle")
 
 
 def clac_rrr(all_lengths, diameters):
@@ -96,48 +99,71 @@ EPP_ = []
 ST_ = []
 percent_difference = []
 difference = []
+sig_percent_difference = []
 
-num1 = 0
-num2 = 2
+num1 = 2
+num2 = 0
 
 for lens, results in zip(all_lengths, NHS_results):
+    results = results[::-1]
     ST_results = clac_rrr(lens, diameters)
-    EPP_.append(results[num1])
-    ST_.append(ST_results[num2])
-    percent_difference.append(abs(results[num1] - ST_results[num2]) * 100 / results[num1])
-    difference.append(results[num1] - ST_results[num2])
+    EPP_.append(results)
+    ST_.append(ST_results)
+    percent_difference.append(abs(ST_results - results) * 100 / results)
+    sig_percent_difference.append((ST_results - results) * 100 / results)
+    difference.append(ST_results - results)
 
 difference = np.array(difference)
+percent_difference = np.array(percent_difference)
+sig_percent_difference = np.array(sig_percent_difference)
 
-result = linregress(EPP_, ST_)
-print(result)
-print(f"r2 value {(result.rvalue)**2}")
+# result = linregress(EPP_, ST_)
+# print(result)
+# print(f"r2 value {(result.rvalue)**2}")
 
 # print(f"average percentage difference: {np.average(percent_difference)}")
 # print(f"std of percentage difference: {np.std(percent_difference)}")
 # print(f"maximum percentage difference: {np.max(percent_difference)}")
 
-print(f"average abs difference: {np.average(abs(difference))}")
-print(f"std of difference: {np.std(abs(difference))}")
-print(f"maximum difference: {np.max(abs(difference))}")
+# print(f"average abs difference: {np.average((difference))}")
+# print(f"std of difference: {np.std((difference))}")
+# print(f"maximum difference: {np.max(abs(difference))}")
 
-plt.scatter(EPP_, ST_)
-plt.xlabel("EPP")
-plt.ylabel("ST")
-plt.show()
+# print(len(percent_difference[abs(percent_difference) < 1.7]) * 100 / len(percent_difference))
 
-# difference = np.array(difference)
-# args = np.argsort(abs(difference))
-# difference = difference[args]
+print(len(percent_difference))
 
-# ranks = list(zip(range(len(difference)), difference))
-
-# pos = [i[0] for i in ranks if i[1] > 0]
-# neg = [i[0] for i in ranks if i[1] < 0]
-
-# crit_val = min(sum(pos), sum(neg))
-
-# print(crit_val)
-# # print(ranks)
-# plt.hist(difference, bins=100)
+# plt.scatter(EPP_, ST_)
+# plt.xlabel("EPP")
+# plt.ylabel("ST")
 # plt.show()
+
+fig = plt.figure()
+ax1 = fig.add_subplot(311)
+ax2 = fig.add_subplot(312, sharex=ax1)
+ax3 = fig.add_subplot(313, sharex=ax1)
+
+ax1.hist(sig_percent_difference.T[0], bins=80, density=True, color="C0", label="Characteristic resolution")
+ax2.hist(sig_percent_difference.T[1], bins=80, density=True, color="C1", label="Depth of field")
+ax3.hist(sig_percent_difference.T[2], bins=80, density=True, color="C2", label="Resolution integral")
+
+ax1.set_ylim()
+ax1.vlines(0, ax1.get_ylim()[0], ax1.get_ylim()[1], colors="k", linestyles="dashed")
+ax2.set_ylim()
+ax2.vlines(0, ax2.get_ylim()[0], ax2.get_ylim()[1], colors="k", linestyles="dashed")
+ax3.set_ylim()
+ax3.vlines(0, ax3.get_ylim()[0], ax3.get_ylim()[1], colors="k", linestyles="dashed")
+
+ax2.set_ylabel("Counts (arb. units)")
+ax3.set_xlabel("Difference between code and spreadsheet (%)")
+
+ax1.get_yaxis().set_ticks([])
+ax2.get_yaxis().set_ticks([])
+ax3.get_yaxis().set_ticks([])
+
+ax1.legend()
+ax2.legend()
+ax3.legend()
+
+plt.tight_layout()
+plt.show()
