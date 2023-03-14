@@ -15,35 +15,50 @@ def profiles():
 
 
 def EPP_plot():
-    epp_dat = np.loadtxt("analysed/gen3/EPP_data.txt", delimiter="\t", dtype=str)
-    dat = np.loadtxt("analysed/gen3/auto_res_check.txt", delimiter=",", dtype=str)
+    data = np.loadtxt("analysed/gen3/all_data.txt", delimiter=",", dtype=str)
+    # format: probe name, EPP R, EPP Dr, EPP Lr,
+    # R, R upper, R lower,
+    # Dr, Dr upper, Dr lower,
+    # Lr, Lr upper, Lr lower
 
-    epp_data_clean = []
-    st_data_clean = []
+    code_uncs = [0.021, 0.04, 0.017]
+    xlabels = ["EPP resolution integral", "EPP characteristic resolution", "EPP depth of field"]
+    ylabels = ["ST resolution integral", "ST characteristic resolution", "ST depth of field"]
+
+    # to plot, R = 0, Dr = 1, Lr = 2
+    index = 2
+
+    arr = np.zeros((len(data), 12))
     names = []
-    
-    for line in dat:
-        p_type = line[0].strip()[1:-1]
-        names.append(p_type)
-        st_data_clean.append([x.strip() for x in line[2:]])
-        for epp in epp_dat:
-            if epp[0] == p_type:
-                epp_data_clean.append(list(epp[2:]))
 
-    epp_data_clean = np.array(epp_data_clean).T
-    st_data_clean = np.array(st_data_clean).T
-    x = epp_data_clean[0].astype(float)
-    y = st_data_clean[0].astype(float)
+    for i, line in enumerate(data):
+        names.append(line[0])
+        arr[i, :] = line[1:]
+
+    x = arr[:, index]
+    y = arr[:, (3 * index) + 3]
+    xerr = x * 0.02   # 2% error
+    yerr = np.array([arr[:, (3 * index) + 5], arr[:, (3 * index) + 4]])
+
+    if index == 2:
+        yerr = 0.1 * y
+
+    # combine with code uncertainty
+    yerr = np.sqrt(yerr**2 + (code_uncs[index] * yerr)**2)
 
     fig, ax = plt.subplots()
+
     for name, xp, yp in zip(names, x, y):
         ax.annotate(f"{name}", (xp + 0.02, yp))
-        print(name, round(100 * yp/xp, 1))
+        # print(name, round(100 * yp/xp, 1))
+    ax.set_xlabel(xlabels[index])
+    ax.set_ylabel(ylabels[index])
     print(pearsonr(x,y))
-    ax.scatter(x, y)
+    ax.errorbar(x, y, yerr=yerr, xerr=xerr, fmt="kx", capsize=2, capthick=1)
     ax.set_xlim([0, ax.get_xlim()[1]])
     ax.set_ylim([0, ax.get_ylim()[1]])
     plt.show()
+
 
 def R_plot():
     fig, ax = plt.subplots(figsize=(10, 7))
@@ -110,5 +125,5 @@ def R_plot():
 
 
 # R_plot()
-# EPP_plot()
-profiles()
+EPP_plot()
+# profiles()
