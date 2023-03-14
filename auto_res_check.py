@@ -97,7 +97,18 @@ def plotter(sides, inverse_diameters, lengths):
     plt.show()
 
 
-def calc_R(lengths, inverse_diameters, show=True):
+def calc_R(lengths:list, inverse_diameters:list, show=True):
+    """Find the resolution integral, Dr, and Lr given visualisation lengths
+    and inverse diameters.
+
+    Args:
+        lengths (list): List of distances over which each pipe could be visualised.
+        inverse_diameters (list): Inverses of the pipe diameters.
+        show (bool, optional): Whether to print info and show the L-alpha plot. Defaults to True.
+
+    Returns:
+        tuple: (Dr, Lr, R) The calculated results.
+    """
 
     # extrapolate to x axis and close integral
 
