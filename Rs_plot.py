@@ -23,7 +23,7 @@ def EPP_plot():
     # Lr, Lr upper, Lr lower
 
     # to plot, R = 0, Dr = 1, Lr = 2
-    index = 1
+    index = 2
 
     code_uncs = [0.021, 0.04, 0.017]
     xlabels = ["R from EPP", "$D_R$ from EPP (mm$^{-1}$)", "$L_R$ from EPP (mm)"]
@@ -40,6 +40,11 @@ def EPP_plot():
         xstandard = 0.02
         offsets = [[xstandard, ystandard],[xstandard, ystandard],[xstandard - 0.23, ystandard - 0.1],[xstandard - 0.28, ystandard - 0.1],[xstandard - 0.28, ystandard-0.2],
                 [xstandard, ystandard],[xstandard + 0.02, ystandard - 0.1],[xstandard + 0.02, ystandard-0.1],[xstandard, ystandard],[xstandard - 0.17, ystandard]]
+    elif index == 2:
+        ystandard = 2
+        xstandard = 1
+        offsets = [[xstandard, ystandard],[xstandard - 26, ystandard],[xstandard, ystandard],[xstandard + 2, ystandard - 5],[xstandard + 2, ystandard - 2],
+                [xstandard - 20, ystandard],[xstandard, ystandard],[xstandard - 34, ystandard - 3],[xstandard, ystandard - 9],[xstandard - 0.4, ystandard]]
 
     arr = np.zeros((len(data), 12))
     names = []
@@ -53,11 +58,18 @@ def EPP_plot():
     xerr = x * 0.02   # 2% error
     yerr = np.array([arr[:, (3 * index) + 5], arr[:, (3 * index) + 4]])
 
+    # 10% error for Lr
     if index == 2:
         yerr = 0.1 * y
 
     # combine with code uncertainty
     yerr = np.sqrt(yerr**2 + (code_uncs[index] * yerr)**2)
+
+    # remove tiny error bars
+    if index == 1:
+        xerr[xerr < 0.02] = 0
+    elif index == 2:
+        xerr[xerr < 1.7] = 0
 
     fig, ax = plt.subplots()
 
