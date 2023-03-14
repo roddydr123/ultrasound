@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
 import numpy as np
+import matplotlib
 
 plt.style.use("thesis.mplstyle")
 
@@ -21,12 +22,24 @@ def EPP_plot():
     # Dr, Dr upper, Dr lower,
     # Lr, Lr upper, Lr lower
 
-    code_uncs = [0.021, 0.04, 0.017]
-    xlabels = ["EPP resolution integral", "EPP characteristic resolution", "EPP depth of field"]
-    ylabels = ["ST resolution integral", "ST characteristic resolution", "ST depth of field"]
-
     # to plot, R = 0, Dr = 1, Lr = 2
-    index = 2
+    index = 1
+
+    code_uncs = [0.021, 0.04, 0.017]
+    xlabels = ["R from EPP", "$D_R$ from EPP (mm$^{-1}$)", "$L_R$ from EPP (mm)"]
+    ylabels = ["R from slice thickness", "$D_R$ from slice thickness (mm$^{-1}$)", "$L_R$ from slice thickness (mm)"]
+
+    # for R plot
+    if index == 0:
+        ystandard = 0.8
+        xstandard = 1
+        offsets = [[xstandard, ystandard],[xstandard - 15, ystandard],[xstandard, ystandard],[xstandard - 12, ystandard],[xstandard, ystandard],
+                [xstandard, ystandard],[xstandard - 20, ystandard - 1],[xstandard - 20, ystandard - 1],[xstandard, ystandard],[xstandard, ystandard]]
+    elif index == 1:
+        ystandard = 0.08
+        xstandard = 0.02
+        offsets = [[xstandard, ystandard],[xstandard, ystandard],[xstandard - 0.23, ystandard - 0.1],[xstandard - 0.28, ystandard - 0.1],[xstandard - 0.28, ystandard-0.2],
+                [xstandard, ystandard],[xstandard + 0.02, ystandard - 0.1],[xstandard + 0.02, ystandard-0.1],[xstandard, ystandard],[xstandard - 0.17, ystandard]]
 
     arr = np.zeros((len(data), 12))
     names = []
@@ -48,15 +61,22 @@ def EPP_plot():
 
     fig, ax = plt.subplots()
 
-    for name, xp, yp in zip(names, x, y):
-        ax.annotate(f"{name}", (xp + 0.02, yp))
+    for name, xp, yp, offset in zip(names, x, y, offsets):
+        ax.annotate(f"{name}", (xp + offset[0], yp + offset[1]))
         # print(name, round(100 * yp/xp, 1))
     ax.set_xlabel(xlabels[index])
     ax.set_ylabel(ylabels[index])
     print(pearsonr(x,y))
-    ax.errorbar(x, y, yerr=yerr, xerr=xerr, fmt="kx", capsize=2, capthick=1)
+    ax.errorbar(x, y, yerr=yerr, xerr=xerr, fmt="kx", capsize=2, capthick=1, elinewidth=1)
     ax.set_xlim([0, ax.get_xlim()[1]])
     ax.set_ylim([0, ax.get_ylim()[1]])
+
+    # stop zeros overlapping
+    if index == 1:
+        offset = matplotlib.transforms.ScaledTranslation(0.05, 0, fig.dpi_scale_trans)
+        ax.xaxis.get_majorticklabels()[0].set_transform(ax.xaxis.get_majorticklabels()[0].get_transform() + offset)
+
+    plt.tight_layout()
     plt.show()
 
 

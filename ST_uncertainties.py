@@ -3,14 +3,14 @@ from auto_res_check import calc_R
 import numpy as np
 
 
-names = ["9L",
-        "ML6-15",
+names = ["9L-D",
+        "ML6-15-D",
         "14L5",
-        "9L4",
-        "9L4",
-        "C15",
-        "18L6",
-        "18L6",
+        "9L4 (a)",
+        "9L4 (b)",
+        "C1-5-D",
+        "18L6 HD (a)",
+        "18L6 HD (b)",
         "4C1",
         "6C1"]
 
