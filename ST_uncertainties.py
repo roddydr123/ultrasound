@@ -3,6 +3,18 @@ from auto_res_check import calc_R
 import numpy as np
 
 
+names = ["9L",
+        "ML6-15",
+        "14L5",
+        "9L4",
+        "9L4",
+        "C15",
+        "18L6",
+        "18L6",
+        "4C1",
+        "6C1"]
+
+
 videos = [
 [27,28,29,30],
 [50,51,56,57],
@@ -16,7 +28,9 @@ videos = [
 [78,79,80,81]
 ]
 
-augs = [-0.1, 0, 0.1]
+EPP_data = np.loadtxt("analysed/gen3/EPP_data.txt", dtype=str, skiprows=1)[:, 1:].astype(float)
+
+augs = [0, -0.1, 0.1]
 
 inv_diameters = np.linspace(0.01, 1.7, 400)
 
@@ -24,19 +38,37 @@ pipe_diameters = 1 / inv_diameters[::-1]
 
 all_dat = []
 
-for video in videos:
+for probe, name, probe_EPP in zip(videos, names, EPP_data):
+    probe_Rs = []
+    probe_Drs = []
+    probe_Lrs = []
     for aug in augs:
-        L_dict, lengths, diameters = extract_Ls(video, pipe_diameters, 20, 3, aug=aug)
+        L_dict, lengths, diameters = extract_Ls(probe, pipe_diameters, 20, 3, aug=aug)
 
         diameters = np.array(diameters)[::-1]
         inverse_diameters = 1 / diameters
 
         lengths = np.array(lengths)[::-1]
 
-        data = calc_R(lengths, inverse_diameters, show=False)
+        Dr, Lr, R = calc_R(lengths, inverse_diameters, show=False)
+        probe_Rs.append(R)
+        probe_Drs.append(Dr)
+        probe_Lrs.append(Lr)
 
-        # print(list(map(float, data)))
+    # save in format: probe name, EPP R, EPP Dr, EPP Lr,
+    # R, R upper, R lower,
+    # Dr, Dr upper, Dr lower,
+    # Lr, Lr upper, Lr lower
+    probe_dat = [name, probe_EPP[0], probe_EPP[2], probe_EPP[1],
+                 np.median(probe_Rs), max(probe_Rs) - np.median(probe_Rs), np.median(probe_Rs) - min(probe_Rs),
+                 np.median(probe_Drs), max(probe_Drs) - np.median(probe_Drs), np.median(probe_Drs) - min(probe_Drs),
+                 np.median(probe_Lrs), max(probe_Lrs) - np.median(probe_Lrs), np.median(probe_Lrs) - min(probe_Lrs)]
 
-        all_dat.append([aug] + list(data))
+    # round the numbers to 5 decimal places
+    probe_dat = [name] + list(map(round, probe_dat[1:], [5]*len(probe_dat[1:])))
+    all_dat.append(probe_dat)
 
-np.savetxt("analysed/gen3/ST_uncertainties.txt", all_dat)
+with open("analysed/gen3/all_data.txt", "w") as f:
+    for line in all_dat:
+        strline = [str(x) for x in line]
+        f.write(",".join(strline) + "\n")
