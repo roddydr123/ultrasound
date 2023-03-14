@@ -1,9 +1,14 @@
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
+from scipy.optimize import curve_fit
 import numpy as np
 import matplotlib
 
 plt.style.use("thesis.mplstyle")
+
+
+def linear(x, m, c):
+    return (m * x) + c
 
 
 def profiles():
@@ -23,7 +28,7 @@ def EPP_plot():
     # Lr, Lr upper, Lr lower
 
     # to plot, R = 0, Dr = 1, Lr = 2
-    index = 2
+    index = 1
 
     code_uncs = [0.021, 0.04, 0.017]
     xlabels = ["R from EPP", "$D_R$ from EPP (mm$^{-1}$)", "$L_R$ from EPP (mm)"]
@@ -71,17 +76,25 @@ def EPP_plot():
     elif index == 2:
         xerr[xerr < 1.7] = 0
 
-    fig, ax = plt.subplots()
+    fig = plt.figure(figsize=(6,6))
+    ax = fig.add_subplot()
 
     for name, xp, yp, offset in zip(names, x, y, offsets):
         ax.annotate(f"{name}", (xp + offset[0], yp + offset[1]))
         # print(name, round(100 * yp/xp, 1))
     ax.set_xlabel(xlabels[index])
     ax.set_ylabel(ylabels[index])
-    print(pearsonr(x,y))
     ax.errorbar(x, y, yerr=yerr, xerr=xerr, fmt="kx", capsize=2, capthick=1, elinewidth=1)
     ax.set_xlim([0, ax.get_xlim()[1]])
     ax.set_ylim([0, ax.get_ylim()[1]])
+
+    if index == 2:
+        popt, pcov = curve_fit(linear, x, y, sigma=yerr)
+        long_x = np.linspace(0, ax.get_xlim()[1], 100)
+        ax.plot(long_x, linear(long_x, *popt), linestyle="dashed")
+        print(popt, np.sqrt(np.diag(pcov)))
+
+    print(round(pearsonr(x,y).statistic, 3))
 
     # stop zeros overlapping
     if index == 1:
