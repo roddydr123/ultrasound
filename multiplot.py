@@ -5,6 +5,8 @@ from videos import fetch_video_details
 from slice_thickness import process_raw_video_data
 import pathlib
 
+plt.style.use("thesis.mplstyle")
+
 
 p = pathlib.Path(__file__).parents
 parentpath = p[1]
@@ -12,9 +14,12 @@ parentpath = p[1]
 PATH = f"{parentpath}/scripts/analysed/gen3/"
 PATH_TO_DETAILS = f"{parentpath}/videos/"
 
+colors = ["C1", "k"]
+labels = ["Un-processed", "Processed"]
+
 
 def plotter(data, title, details_list):
-    fig, ax = plt.subplots(figsize=(14, 10))
+    fig, ax = plt.subplots(figsize=(10, 4))
     # newax = ax.twinx()
     for i, dataset in enumerate(data):
         # order data to be deeper monotonically.
@@ -24,10 +29,10 @@ def plotter(data, title, details_list):
         h = np.array(dataset[2])[ind]
         x, y, h, dz, LCP = process_raw_video_data([x, y, h], 20, 3)
         # smooth the line and plot it.
-        ax.plot(x, y, label=details_list[i])
+        ax.plot(x, y, label=labels[i], color=colors[i])
         # newax.plot(x, h, "r")
-    ax.set_xlabel("Depth/mm")
-    ax.set_ylabel("Slice thickness/mm")
+    ax.set_xlabel("Depth (mm)")
+    ax.set_ylabel("Slice Thickness (mm)")
     ax.legend()
     xlims = ax.get_xlim()
     ax.set_xlim(0, xlims[1])
@@ -35,6 +40,7 @@ def plotter(data, title, details_list):
     # newax.set_ylim(0, newax.get_ylim()[1])
     ax.yaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
+    plt.tight_layout()
     plt.show()
 
 
