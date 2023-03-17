@@ -31,8 +31,8 @@ def EPP_plot():
     index = 1
 
     code_uncs = [0.021, 0.04, 0.017]
-    xlabels = ["R from EPP", "$D_R$ from EPP (mm$^{-1}$)", "$L_R$ from EPP (mm)"]
-    ylabels = ["R from slice thickness", "$D_R$ from slice thickness (mm$^{-1}$)", "$L_R$ from slice thickness (mm)"]
+    xlabels = ["Resolution Integral (EPP)", "Characteristic Resolution (EPP) (mm)", "Depth of Field (EPP) (mm)"]
+    ylabels = ["Resolution Integral (ST)", "Characteristic Resolution (ST) (mm)", "Depth of Field (ST) (mm)"]
 
     # for R plot
     if index == 0:
@@ -48,7 +48,7 @@ def EPP_plot():
     elif index == 2:
         ystandard = 2
         xstandard = 1
-        offsets = [[xstandard, ystandard],[xstandard - 26, ystandard],[xstandard, ystandard],[xstandard + 2, ystandard - 5],[xstandard + 2, ystandard - 2],
+        offsets = [[xstandard, ystandard],[xstandard - 29, ystandard],[xstandard, ystandard],[xstandard + 2, ystandard - 5],[xstandard + 2, ystandard - 2],
                 [xstandard - 20, ystandard],[xstandard, ystandard],[xstandard - 34, ystandard - 3],[xstandard, ystandard - 9],[xstandard - 0.4, ystandard]]
 
     arr = np.zeros((len(data), 12))
@@ -85,11 +85,21 @@ def EPP_plot():
     ax.set_xlabel(xlabels[index])
     ax.set_ylabel(ylabels[index])
     ax.errorbar(x, y, yerr=yerr, xerr=xerr, fmt="kx", capsize=2, capthick=1, elinewidth=1)
-    ax.set_xlim([0, ax.get_xlim()[1]])
+
     ax.set_ylim([0, ax.get_ylim()[1]])
+    ax.set_xlim([0, ax.get_xlim()[1]])
 
     if index == 2:
+        lim = max(ax.get_ylim()[1], ax.get_xlim()[1])
+        ax.set_ylim([0, lim])
+        ax.set_xlim([0, lim])
         popt, pcov = curve_fit(linear, x, y, sigma=yerr)
+        long_x = np.linspace(0, ax.get_xlim()[1], 100)
+        ax.plot(long_x, linear(long_x, *popt), linestyle="dashed")
+        print(popt, np.sqrt(np.diag(pcov)))
+
+    if index == 1:
+        popt, pcov = curve_fit(linear, x, y, sigma = yerr[1])
         long_x = np.linspace(0, ax.get_xlim()[1], 100)
         ax.plot(long_x, linear(long_x, *popt), linestyle="dashed")
         print(popt, np.sqrt(np.diag(pcov)))
@@ -109,7 +119,7 @@ def R_plot():
     fig, ax = plt.subplots(figsize=(10, 7))
 
     # dat = np.loadtxt("analysed/gen3/reduced_Rs.txt", delimiter="\t", skiprows=1, dtype=str)
-    dat = np.loadtxt("analysed/gen3/auto_res_check.txt", delimiter=",", dtype=str)
+    dat = np.loadtxt("analysed/gen3/all_data.txt", delimiter=",", dtype=str)
     dat_xs = []
     dat_ys = []
 
@@ -122,13 +132,12 @@ def R_plot():
     ing_ys = []
 
     for probe in dat:
-        if probe[1] != "EPP":
-            x = float(probe[4])
-            y = float(probe[3])
-            dat_xs.append(x)
-            dat_ys.append(y)
-            ax.annotate(f"{probe[0][1:-1]}", (x + 0.04, y))
-    ax.scatter(dat_xs, dat_ys, label="Slice thickness measurements")
+        x = float(probe[7])
+        y = float(probe[10])
+        dat_xs.append(x)
+        dat_ys.append(y)
+        ax.annotate(f"{probe[0]}", (x + 0.04, y))
+    ax.scatter(dat_xs, dat_ys, label="Slice thickness")
 
     for probe in moran_dat:
         x = float(probe[4])
@@ -136,7 +145,7 @@ def R_plot():
         mor_xs.append(x)
         mor_ys.append(y)
         # ax.annotate(f"{probe[0]}", (x, y))
-    ax.scatter(mor_xs, mor_ys, marker="x", label="Moran et al.")
+    ax.scatter(mor_xs, mor_ys, marker="x", label="Preclinical transducers (Moran et al.)")
 
     for probe in inglis_dat:
         x = float(probe[4])
@@ -144,7 +153,7 @@ def R_plot():
         ing_xs.append(x)
         ing_ys.append(y)
         # ax.annotate(f"{probe[0]}", (x + 0.04, y))
-    ax.scatter(ing_xs, ing_ys, marker="s", label="Inglis et al.")
+    ax.scatter(ing_xs, ing_ys, marker="s", label="Endocavity transducers (Inglis et al.)")
 
     ax.set_xlim([0, ax.get_xlim()[1]])
     ax.set_ylim([0, ax.get_ylim()[1]])
@@ -160,8 +169,8 @@ def R_plot():
     ax.plot(xs, ys12, "k--")
     ax.annotate("R = 12.5", (xs[-20], ys12[-20]-3), fontsize="large")
 
-    ax.set_xlabel("Characteristic resolution (mm)")
-    ax.set_ylabel("Depth of field (mm)")
+    ax.set_xlabel("$D_R$ (mm$^{-1}$)")
+    ax.set_ylabel("$L_R$ (mm)")
 
     ax.legend()
 
