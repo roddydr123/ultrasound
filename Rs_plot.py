@@ -3,6 +3,8 @@ from scipy.stats import pearsonr
 from scipy.optimize import curve_fit
 import numpy as np
 import matplotlib
+from auto_res_check import calc_R
+from slice_thickness import extract_Ls
 
 plt.style.use("thesis.mplstyle")
 
@@ -17,6 +19,55 @@ def profiles():
         data = np.loadtxt(f"analysed/width_expt/27-{file}.txt").T
         plt.plot(data[0], data[1])
     plt.show()
+
+
+def L_alpha():
+    videos = [
+    [27,28,29,30],
+    [50,51,56,57],
+    [60,61,62,63], 
+    [21,22,23,24],
+    [72,73,74,75], 
+    [25,26,31,32],
+    [35,36,37,38],
+    [68,69,70,71],
+    [64,65,66,67],
+    [78,79,80,81]
+    ]
+
+    inv_diameters = np.linspace(0.01, 1.7, 400)
+
+    pipe_diameters = 1 / inv_diameters[::-1]
+    L_dict, lengths, diameters = extract_Ls(videos[0], pipe_diameters, 20, 3)
+
+    # lengths = np.array([0.0, 2.9, 26.0, 40.3, 55.0, 71.0, 81.3, 89.7, 93.4, 94.6, 97.2, 98.6])  # NHS data for ML6-15 31/03/15
+    # lengths = np.array([0.0,0.0,3.8,18.1,23.9,70.1,85.1,128.6,147.0,165.6,165.1, 192.0]) # NHS data for 9LD 01/04/15
+    # lengths = np.array([0.0,0.0,28.2,44.0,53.2,73.0,85.2,91.9,95.5,96.2,96.2,96.2])   # NHS data ML6-15 20/08/13
+    # lengths = np.array([0.0, 2.0, 10.8, 22.7, 39.6, 44.9, 57.0, 65.8, 69.3, 72.5, 75.8, 76.8]) # NHS data 14L5 21/07/10
+    # lengths = np.array([0.0, 0.0, 6.4, 24.4, 43.5, 58.5, 83.9, 97.7, 132.6, 137.9, 137.9, 137.9])  # NHS data 9L4 lab folder
+    # lengths = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 41.0, 73.6, 121.0, 169.5, 197.1, 203.1, 221.5])   # NHS data C1-5 lab folder
+    # lengths = [0,2.2,12.8,19.1,28.7,39.7,60.9,64.9,65.5,66.6,65.9,65.2] # NHS data in folder 18L6
+    # lengths = [0,0,0,0,0,4.6,47.1,117.2,175.6,195,200.5,215.8]  # NHS data in folder 6C1
+    # lengths = [0, 0, 0, 0, 0, 22.9, 72.6, 108, 148, 197, 201, 233]  # 4C1 NHS folder
+
+
+    """Pipe/slice thickness diameters in mm"""
+    # diameters = np.array([0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf])
+    # diameters = np.array([0.35, 0.42, 0.56, 0.70, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 7.9, np.inf])   # NHS data teams spreadsheet
+    # diameters = np.array(
+    #     [0.3, 0.4, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, np.inf]
+    # )  # NHS data lab folder
+
+    # diameters = np.array(diameters)[::-1] / np.sqrt(
+    #     np.cos(np.deg2rad(40))
+    # )  # convert to effective diameter and reverse
+
+    diameters = np.array(diameters)[::-1]
+    inverse_diameters = 1 / diameters
+    lengths = np.array(lengths)[::-1]
+
+    Dr, Lr, R = calc_R(lengths, inverse_diameters, show=True)
+
 
 
 
@@ -179,5 +230,6 @@ def R_plot():
 
 
 # R_plot()
-EPP_plot()
+# EPP_plot()
+L_alpha()
 # profiles()
