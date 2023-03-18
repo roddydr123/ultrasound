@@ -3,6 +3,7 @@ This is a script for calculating the resolution integral from measurements
 made with an ultrasound machine and Edinburgh Pipe Phantom (EPP).
 """
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from slice_thickness import extract_Ls
 from scipy.optimize import minimize_scalar
@@ -82,17 +83,24 @@ def rectSides(bisecting_coords, curve_area):
 def plotter(sides, inverse_diameters, lengths):
 
     fig, ax = plt.subplots()
-    ax.scatter(sides[0], sides[1], c="k", marker="x")
+    ax.plot([0, sides[0]], [0, sides[1]], "k--")
 
-    ax.plot(inverse_diameters, lengths)
-    ax.set_xlabel("$\\alpha$ (1/mm)")
-    ax.set_ylabel("Lr (mm)")
+    ax.plot(inverse_diameters, lengths, "k-", linewidth=2)
+    # ax.scatter(inverse_diameters[:-2], lengths[:-2], c="k", linewidth=0.5, marker="o")
+    ax.set_xlabel("$\\alpha$ (mm$^{-1}$)")
+    ax.set_ylabel("L (mm)")
 
-    ax.vlines(sides[0], 0, sides[1], colors=["k"])
-    ax.hlines(sides[1], 0, sides[0], colors=["k"])
+    ax.vlines(sides[0], 0, sides[1], colors=["k"], linestyles=["dotted"])
+    ax.hlines(sides[1], 0, sides[0], colors=["k"], linestyles=["dotted"])
 
     ax.set_ylim(0, ax.get_ylim()[1])
-    ax.set_xlim(0, ax.get_xlim()[1])
+    ax.set_xlim(0, 1.1 * inverse_diameters[np.argmin(lengths)])
+
+    offset = matplotlib.transforms.ScaledTranslation(0.05, 0, fig.dpi_scale_trans)
+    ax.xaxis.get_majorticklabels()[0].set_transform(ax.xaxis.get_majorticklabels()[0].get_transform() + offset)
+
+    plt.tight_layout()
+    plt.locator_params(nbins=4)
 
     plt.show()
 

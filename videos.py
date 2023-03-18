@@ -4,7 +4,6 @@ from scipy.signal import find_peaks
 import csv
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-import gc
 
 
 class Video:
