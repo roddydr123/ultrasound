@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, spearmanr
 from scipy.optimize import curve_fit
 import numpy as np
 import matplotlib
@@ -72,14 +72,18 @@ def L_alpha():
 
 
 def EPP_plot():
-    data = np.loadtxt("analysed/gen3/all_data.txt", delimiter=",", dtype=str)
+    data = np.loadtxt("analysed/gen3/all_data.txt", delimiter=",", dtype=str, skiprows=1)
     # format: probe name, EPP R, EPP Dr, EPP Lr,
     # R, R upper, R lower,
     # Dr, Dr upper, Dr lower,
     # Lr, Lr upper, Lr lower
 
+    data = np.append(data[2:-1], data[0].reshape(1,-1), axis=0)
+    data = np.append(data[:-2], data[-1].reshape(1,-1), axis=0)
+    print(data)
+
     # to plot, R = 0, Dr = 1, Lr = 2
-    index = 1
+    index = 0
 
     code_uncs = [0.021, 0.04, 0.017]
     xlabels = ["Resolution Integral (EPP)", "Characteristic Resolution (EPP) (mm)", "Depth of Field (EPP) (mm)"]
@@ -129,6 +133,7 @@ def EPP_plot():
 
     fig = plt.figure(figsize=(6,6))
     ax = fig.add_subplot()
+    # ax2 = fig.add_subplot(122)
 
     for name, xp, yp, offset in zip(names, x, y, offsets):
         ax.annotate(f"{name}", (xp + offset[0], yp + offset[1]))
@@ -156,6 +161,9 @@ def EPP_plot():
         print(popt, np.sqrt(np.diag(pcov)))
 
     print(round(pearsonr(x,y).statistic, 3))
+    print(round(spearmanr(x,y).statistic, 3))
+
+    # ax2.errorbar(x, y - linear(x, *popt), yerr=yerr, fmt="kx")
 
     # stop zeros overlapping
     if index == 1:
@@ -230,6 +238,6 @@ def R_plot():
 
 
 # R_plot()
-# EPP_plot()
-L_alpha()
+EPP_plot()
+# L_alpha()
 # profiles()
