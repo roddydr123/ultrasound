@@ -18,52 +18,51 @@ def profiles():
     fig = plt.figure(figsize=(10,4))
     ax = fig.add_subplot()
 
-    neames = np.arange(200, 1400, 200)
-    for file in neames:
+    colors = ["C0", "k"]
+    names = np.arange(200, 1400, 200)
+    for i, file in enumerate(names):
         datai = np.loadtxt(f"analysed/width_expt/30-{file}.txt").T
         x = datai[0]
         x *=10
         y = datai[1]
-        ax.plot(x, y)
+        color = colors[i % 2]
+        ax.plot(x, y, color)
         peaks, properties = find_peaks(y, distance=len(x), width=(5, 70), height=(0, 5000))
+
+        # ax.annotate(f"{np.round(properties['widths'], 1)} mm", [x[peaks], y[peaks] + 3])
 
         ax.plot(x[peaks], y[peaks], "x")
 
-        ax.vlines(x=x[peaks], ymin=y[peaks] - properties["prominences"],
+        ax.vlines(x=x[peaks], ymin=y[peaks] - properties["prominences"], ymax = y[peaks], color = "C1")
 
-                ymax = y[peaks], color = "C1")
-
-        ax.hlines(y=properties["width_heights"], xmin=x[int(properties["left_ips"])],
-
-                xmax=x[int(properties["right_ips"])], color = "C1")
+        ax.hlines(y=properties["width_heights"], xmin=x[int(properties["left_ips"])], xmax=x[int(properties["right_ips"])], color = "C1")
         
 
-    neames = np.arange(400, 1600, 200)
-    for file in neames:
+    names = np.arange(400, 1600, 200)
+    for i, file in enumerate(names):
         data = np.loadtxt(f"analysed/width_expt/28-{file}.txt").T
         x = data[0]
         x *= 10
         y = data[1]
-        ax.plot(x, y)
+        color = colors[i % 2]
+        ax.plot(x, y, color)
         peaks, properties = find_peaks(y, distance=len(x), width=(5, 70), height=(0, 5000))
+
+        # ax.annotate(f"{np.round(properties['widths'], 1)} mm", [x[peaks], y[peaks] + 3])
 
         ax.plot(x[peaks], y[peaks], "x")
 
-        ax.vlines(x=x[peaks], ymin=y[peaks] - properties["prominences"],
+        ax.vlines(x=x[peaks], ymin=y[peaks] - properties["prominences"], ymax = y[peaks], color = "C1")
 
-                ymax = y[peaks], color = "C1")
-
-        ax.hlines(y=properties["width_heights"], xmin=x[int(properties["left_ips"])],
-
-                xmax=x[int(properties["right_ips"])], color = "C1")
+        ax.hlines(y=properties["width_heights"], xmin=x[int(properties["left_ips"])], xmax=x[int(properties["right_ips"])], color = "C1")
 
     ax.set_xlabel("Depth (mm)")
     ax.set_ylabel("Pixel value")
-    ax.legend()
+    # ax.legend()
     ax.set_xlim(0, datai[0].max())
     ax.set_ylim(0, ax.get_ylim()[1])
-    offset = matplotlib.transforms.ScaledTranslation(0.05, 0, fig.dpi_scale_trans)
-    ax.xaxis.get_majorticklabels()[0].set_transform(ax.xaxis.get_majorticklabels()[0].get_transform() + offset)
+    # offset = matplotlib.transforms.ScaledTranslation(0.05, 0, fig.dpi_scale_trans)
+    # ax.xaxis.get_majorticklabels()[0].set_transform(ax.xaxis.get_majorticklabels()[0].get_transform() + offset)
     plt.tight_layout()
     plt.show()
 
