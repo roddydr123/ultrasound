@@ -61,8 +61,8 @@ def profiles():
     # ax.legend()
     ax.set_xlim(0, datai[0].max())
     ax.set_ylim(0, ax.get_ylim()[1])
-    # offset = matplotlib.transforms.ScaledTranslation(0.05, 0, fig.dpi_scale_trans)
-    # ax.xaxis.get_majorticklabels()[0].set_transform(ax.xaxis.get_majorticklabels()[0].get_transform() + offset)
+    ax.yaxis.get_ticklocs(minor=True)
+    ax.minorticks_on()
     plt.tight_layout()
     plt.show()
 
