@@ -51,6 +51,8 @@ for probe, name, probe_EPP in zip(videos, names, EPP_data):
         lengths = np.array(lengths)[::-1]
 
         Dr, Lr, R = calc_R(lengths, inverse_diameters, show=False)
+        bounds = 0.1
+        assert (R > round(Lr / Dr, 2) - bounds and R < round(Lr / Dr, 2) + bounds)
         probe_Rs.append(R)
         probe_Drs.append(Dr)
         probe_Lrs.append(Lr)
@@ -69,6 +71,7 @@ for probe, name, probe_EPP in zip(videos, names, EPP_data):
     all_dat.append(probe_dat)
 
 with open("analysed/gen3/all_data.txt", "w") as f:
+    f.write("Probe,EPP R,EPP Dr,EPP Lr,R,R upper,R lower,Dr,Dr upper,Dr lower,Lr,Lr upper,Lr lower\n")
     for line in all_dat:
         strline = [str(x) for x in line]
         f.write(",".join(strline) + "\n")
