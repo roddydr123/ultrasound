@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr, spearmanr
 from scipy.optimize import curve_fit
+from scipy.signal import find_peaks
 import numpy as np
 import matplotlib
 from auto_res_check import calc_R
@@ -14,10 +15,56 @@ def linear(x, m, c):
 
 
 def profiles():
-    neames = [400, 600, 800, 1000, 1200]
+    fig = plt.figure(figsize=(10,4))
+    ax = fig.add_subplot()
+
+    neames = np.arange(200, 1400, 200)
     for file in neames:
-        data = np.loadtxt(f"analysed/width_expt/27-{file}.txt").T
-        plt.plot(data[0], data[1])
+        datai = np.loadtxt(f"analysed/width_expt/30-{file}.txt").T
+        x = datai[0]
+        x *=10
+        y = datai[1]
+        ax.plot(x, y)
+        peaks, properties = find_peaks(y, distance=len(x), width=(5, 70), height=(0, 5000))
+
+        ax.plot(x[peaks], y[peaks], "x")
+
+        ax.vlines(x=x[peaks], ymin=y[peaks] - properties["prominences"],
+
+                ymax = y[peaks], color = "C1")
+
+        ax.hlines(y=properties["width_heights"], xmin=x[int(properties["left_ips"])],
+
+                xmax=x[int(properties["right_ips"])], color = "C1")
+        
+
+    neames = np.arange(400, 1600, 200)
+    for file in neames:
+        data = np.loadtxt(f"analysed/width_expt/28-{file}.txt").T
+        x = data[0]
+        x *= 10
+        y = data[1]
+        ax.plot(x, y)
+        peaks, properties = find_peaks(y, distance=len(x), width=(5, 70), height=(0, 5000))
+
+        ax.plot(x[peaks], y[peaks], "x")
+
+        ax.vlines(x=x[peaks], ymin=y[peaks] - properties["prominences"],
+
+                ymax = y[peaks], color = "C1")
+
+        ax.hlines(y=properties["width_heights"], xmin=x[int(properties["left_ips"])],
+
+                xmax=x[int(properties["right_ips"])], color = "C1")
+
+    ax.set_xlabel("Depth (mm)")
+    ax.set_ylabel("Pixel value")
+    ax.legend()
+    ax.set_xlim(0, datai[0].max())
+    ax.set_ylim(0, ax.get_ylim()[1])
+    offset = matplotlib.transforms.ScaledTranslation(0.05, 0, fig.dpi_scale_trans)
+    ax.xaxis.get_majorticklabels()[0].set_transform(ax.xaxis.get_majorticklabels()[0].get_transform() + offset)
+    plt.tight_layout()
     plt.show()
 
 
@@ -238,6 +285,6 @@ def R_plot():
 
 
 # R_plot()
-EPP_plot()
+# EPP_plot()
 # L_alpha()
-# profiles()
+profiles()
