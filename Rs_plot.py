@@ -125,7 +125,7 @@ def EPP_plot():
     # Lr, Lr upper, Lr lower
 
     # to plot, R = 0, Dr = 1, Lr = 2
-    index = 1
+    index = 0
 
     code_uncs = [0.021, 0.04, 0.017]
     xlabels = ["Resolution Integral (EPP)", "Characteristic Resolution (EPP) (mm)", "Depth of Field (EPP) (mm)"]
@@ -133,20 +133,20 @@ def EPP_plot():
 
     # for R plot
     if index == 0:
-        ystandard = 0.8
-        xstandard = 1
-        offsets = [[xstandard, ystandard],[xstandard - 15, ystandard],[xstandard, ystandard],[xstandard - 12, ystandard],[xstandard, ystandard],
-                [xstandard, ystandard],[xstandard - 20, ystandard - 1],[xstandard - 20, ystandard - 1],[xstandard, ystandard],[xstandard, ystandard]]
+        ystan = 0.8
+        xstan = 1
+        offsets = [[xstan, ystan],[xstan - 15, ystan-5],[xstan-12, ystan-2.4],[xstan-17, ystan-1.4],[xstan-17, ystan-1.4],
+                [xstan-16, ystan-1.4],[xstan - 25, ystan - 1.4],[xstan - 25, ystan - 1.4],[xstan + 2, ystan-1.4],[xstan-10, ystan-1.4]]
     elif index == 1:
-        ystandard = 0.08
-        xstandard = 0.02
-        offsets = [[xstandard, ystandard],[xstandard, ystandard],[xstandard - 0.23, ystandard - 0.1],[xstandard - 0.28, ystandard - 0.1],[xstandard - 0.28, ystandard-0.2],
-                [xstandard, ystandard],[xstandard + 0.02, ystandard - 0.1],[xstandard + 0.02, ystandard-0.1],[xstandard, ystandard],[xstandard - 0.17, ystandard]]
+        ystan = 0.08
+        xstan = 0.02
+        offsets = [[xstan, ystan],[xstan - 0.22, ystan + 0.3],[xstan - 0.30, ystan - 0.15],[xstan - 0.38, ystan - 0.1],[xstan - 0.38, ystan-0.2],
+                [xstan-0.18, ystan + 0.4],[xstan + 0.02, ystan - 0.15],[xstan + 0.02, ystan-0.15],[xstan, ystan],[xstan - 0.1, ystan-0.7]]
     elif index == 2:
-        ystandard = 2
-        xstandard = 1
-        offsets = [[xstandard - 9, ystandard + 10],[xstandard - 29, ystandard + 8],[xstandard + 3, ystandard - 4],[xstandard + 2, ystandard - 5],[xstandard + 2, ystandard - 2],
-                [xstandard - 20, ystandard + 15],[xstandard - 42, ystandard - 4],[xstandard - 42, ystandard - 4],[xstandard - 7, ystandard + 15],[xstandard - 5, ystandard + 15]]
+        ystan = 2
+        xstan = 1
+        offsets = [[xstan - 9, ystan + 10],[xstan - 29, ystan + 8],[xstan + 3, ystan - 4],[xstan + 2, ystan - 5],[xstan + 2, ystan - 2],
+                [xstan - 20, ystan + 15],[xstan - 42, ystan - 4],[xstan - 42, ystan - 4],[xstan - 7, ystan + 15],[xstan - 5, ystan + 15]]
 
     arr = np.zeros((len(data), 12))
     names = []
@@ -182,7 +182,12 @@ def EPP_plot():
     ax.set_xlabel(xlabels[index])
     ax.set_ylabel(ylabels[index])
 
+    if index != 2:
+        yerr = yerr.T
+
     for i, x, y, xe, ye in zip(range(len(x_array)), x_array, y_array, xerr, yerr):
+        if index != 2:
+            ye = ye.reshape(2,1)
         if i in [5,8,9]:
             if i == 5:
                 ax.errorbar(x, y, yerr=ye, xerr=xe, fmt="C1s", capsize=2, capthick=1, elinewidth=1, label="Curvilinear")
@@ -205,6 +210,9 @@ def EPP_plot():
     ax.legend()
     ax.set_ylim([0, ax.get_ylim()[1]])
     ax.set_xlim([0, ax.get_xlim()[1]])
+
+    if index != 2:
+        yerr = yerr.T
 
     if index == 2:
         lim = max(ax.get_ylim()[1], ax.get_xlim()[1])
@@ -237,7 +245,7 @@ def R_plot():
     fig, ax = plt.subplots(figsize=(10, 7))
 
     # dat = np.loadtxt("analysed/gen3/reduced_Rs.txt", delimiter="\t", skiprows=1, dtype=str)
-    dat = np.loadtxt("analysed/gen3/all_data.txt", delimiter=",", dtype=str)
+    dat = np.loadtxt("analysed/gen3/all_data.txt", delimiter=",", dtype=str, skiprows=1)
     dat_xs = []
     dat_ys = []
 
@@ -296,7 +304,7 @@ def R_plot():
     plt.show()
 
 
-# R_plot()
-EPP_plot()
+R_plot()
+# EPP_plot()
 # L_alpha()
 # profiles()
