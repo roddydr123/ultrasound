@@ -10,8 +10,8 @@ from slice_thickness import extract_Ls
 plt.style.use("thesis.mplstyle")
 
 
-def linear(x, m, c):
-    return (m * x) + c
+def linear(x_array, m, c):
+    return (m * x_array) + c
 
 
 def profiles():
@@ -124,12 +124,8 @@ def EPP_plot():
     # Dr, Dr upper, Dr lower,
     # Lr, Lr upper, Lr lower
 
-    data = np.append(data[2:-1], data[0].reshape(1,-1), axis=0)
-    data = np.append(data[:-2], data[-1].reshape(1,-1), axis=0)
-    print(data)
-
     # to plot, R = 0, Dr = 1, Lr = 2
-    index = 0
+    index = 1
 
     code_uncs = [0.021, 0.04, 0.017]
     xlabels = ["Resolution Integral (EPP)", "Characteristic Resolution (EPP) (mm)", "Depth of Field (EPP) (mm)"]
@@ -149,8 +145,8 @@ def EPP_plot():
     elif index == 2:
         ystandard = 2
         xstandard = 1
-        offsets = [[xstandard, ystandard],[xstandard - 29, ystandard],[xstandard, ystandard],[xstandard + 2, ystandard - 5],[xstandard + 2, ystandard - 2],
-                [xstandard - 20, ystandard],[xstandard, ystandard],[xstandard - 34, ystandard - 3],[xstandard, ystandard - 9],[xstandard - 0.4, ystandard]]
+        offsets = [[xstandard - 9, ystandard + 10],[xstandard - 29, ystandard + 8],[xstandard + 3, ystandard - 4],[xstandard + 2, ystandard - 5],[xstandard + 2, ystandard - 2],
+                [xstandard - 20, ystandard + 15],[xstandard - 42, ystandard - 4],[xstandard - 42, ystandard - 4],[xstandard - 7, ystandard + 15],[xstandard - 5, ystandard + 15]]
 
     arr = np.zeros((len(data), 12))
     names = []
@@ -159,14 +155,14 @@ def EPP_plot():
         names.append(line[0])
         arr[i, :] = line[1:]
 
-    x = arr[:, index]
-    y = arr[:, (3 * index) + 3]
-    xerr = x * 0.02   # 2% error
+    x_array = arr[:, index]
+    y_array = arr[:, (3 * index) + 3]
+    xerr = x_array * 0.02   # 2% error
     yerr = np.array([arr[:, (3 * index) + 5], arr[:, (3 * index) + 4]])
 
     # 10% error for Lr
     if index == 2:
-        yerr = 0.1 * y
+        yerr = 0.1 * y_array
 
     # combine with code uncertainty
     yerr = np.sqrt(yerr**2 + (code_uncs[index] * yerr)**2)
@@ -179,15 +175,34 @@ def EPP_plot():
 
     fig = plt.figure(figsize=(6,6))
     ax = fig.add_subplot()
-    # ax2 = fig.add_subplot(122)
 
-    for name, xp, yp, offset in zip(names, x, y, offsets):
-        ax.annotate(f"{name}", (xp + offset[0], yp + offset[1]))
-        # print(name, round(100 * yp/xp, 1))
+    for name, xp, yp, offset in zip(names, x_array, y_array, offsets):
+        ax.annotate(f"{name}", (xp + offset[0], yp + offset[1]), fontsize=12)
+
     ax.set_xlabel(xlabels[index])
     ax.set_ylabel(ylabels[index])
-    ax.errorbar(x, y, yerr=yerr, xerr=xerr, fmt="kx", capsize=2, capthick=1, elinewidth=1)
 
+    for i, x, y, xe, ye in zip(range(len(x_array)), x_array, y_array, xerr, yerr):
+        if i in [5,8,9]:
+            if i == 5:
+                ax.errorbar(x, y, yerr=ye, xerr=xe, fmt="C1s", capsize=2, capthick=1, elinewidth=1, label="Curvilinear")
+            else:
+                ax.errorbar(x, y, yerr=ye, xerr=xe, fmt="C1s", capsize=2, capthick=1, elinewidth=1)
+            # curvi
+            
+        elif i in [0,6,7]:
+            #linear
+            if i == 0:
+                ax.errorbar(x, y, yerr=ye, xerr=xe, fmt="kx", capsize=2, capthick=1, elinewidth=1, label="Linear")
+            else:
+                ax.errorbar(x, y, yerr=ye, xerr=xe, fmt="kx", capsize=2, capthick=1, elinewidth=1)
+        else:
+            if i == 4:
+                ax.errorbar(x, y, yerr=ye, xerr=xe, fmt="C0o", capsize=2, capthick=1, elinewidth=1, label="Multi-row")
+            else:
+                ax.errorbar(x, y, yerr=ye, xerr=xe, fmt="C0o", capsize=2, capthick=1, elinewidth=1)
+
+    ax.legend()
     ax.set_ylim([0, ax.get_ylim()[1]])
     ax.set_xlim([0, ax.get_xlim()[1]])
 
@@ -195,21 +210,19 @@ def EPP_plot():
         lim = max(ax.get_ylim()[1], ax.get_xlim()[1])
         ax.set_ylim([0, lim])
         ax.set_xlim([0, lim])
-        popt, pcov = curve_fit(linear, x, y, sigma=yerr)
+        popt, pcov = curve_fit(linear, x_array, y_array, sigma=yerr)
         long_x = np.linspace(0, ax.get_xlim()[1], 100)
         ax.plot(long_x, linear(long_x, *popt), linestyle="dashed")
         print(popt, np.sqrt(np.diag(pcov)))
 
     if index == 1:
-        popt, pcov = curve_fit(linear, x, y, sigma = yerr[1])
+        popt, pcov = curve_fit(linear, x_array, y_array, sigma = yerr[1])
         long_x = np.linspace(0, ax.get_xlim()[1], 100)
         ax.plot(long_x, linear(long_x, *popt), linestyle="dashed")
         print(popt, np.sqrt(np.diag(pcov)))
 
-    print(round(pearsonr(x,y).statistic, 3))
-    print(round(spearmanr(x,y).statistic, 3))
-
-    # ax2.errorbar(x, y - linear(x, *popt), yerr=yerr, fmt="kx")
+    print(round(pearsonr(x_array,y_array).statistic, 3))
+    print(round(spearmanr(x_array,y_array).statistic, 3))
 
     # stop zeros overlapping
     if index == 1:
@@ -284,6 +297,6 @@ def R_plot():
 
 
 # R_plot()
-# EPP_plot()
+EPP_plot()
 # L_alpha()
-profiles()
+# profiles()
