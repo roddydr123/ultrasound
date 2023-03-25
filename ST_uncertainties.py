@@ -71,7 +71,7 @@ for probe, name, probe_EPP in zip(videos, names, EPP_data):
     all_dat.append(probe_dat)
 
 with open("analysed/gen3/all_data.txt", "w") as f:
-    f.write("Probe,EPP R,EPP Dr,EPP Lr,R,R upper,R lower,Dr,Dr upper,Dr lower,Lr,Lr upper,Lr lower\n")
+    f.write("Probe,R (EPP),Dr (EPP),Lr (EPP),R (ST),R upper,R lower,Dr (ST),Dr upper,Dr lower,Lr (ST),Lr upper,Lr lower\n")
     for line in all_dat:
         strline = [str(x) for x in line]
         f.write(",".join(strline) + "\n")
