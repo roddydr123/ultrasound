@@ -182,6 +182,8 @@ def EPP_plot():
     ax.set_xlabel(xlabels[index])
     ax.set_ylabel(ylabels[index])
 
+    print(np.average(yerr *100 / y_array))
+
     if index != 2:
         yerr = yerr.T
 
@@ -257,13 +259,29 @@ def R_plot():
     ing_xs = []
     ing_ys = []
 
-    for probe in dat:
-        x = float(probe[7])
-        y = float(probe[10])
-        dat_xs.append(x)
-        dat_ys.append(y)
-        ax.annotate(f"{probe[0]}", (x + 0.04, y))
-    ax.scatter(dat_xs, dat_ys, label="Slice thickness")
+    dat_xs = dat[:, 7].astype(float)
+    dat_ys = dat[:, 10].astype(float)
+
+    for i, x, y in zip(range(len(dat)), dat_xs, dat_ys):
+        if i in [5,8,9]:
+            if i == 5:
+                ax.errorbar(x, y, fmt="C1s", capsize=2, capthick=1, elinewidth=1, label="Curvilinear", markersize=8)
+            else:
+                ax.errorbar(x, y, fmt="C1s", capsize=2, capthick=1, elinewidth=1, markersize=8)
+            # curvi
+            
+        elif i in [0,6,7]:
+            #linear
+            if i == 0:
+                ax.errorbar(x, y, fmt="kx", capsize=2, capthick=1, elinewidth=1, label="Linear", markersize=8)
+            else:
+                ax.errorbar(x, y, fmt="kx", capsize=2, capthick=1, elinewidth=1, markersize=8)
+        else:
+            if i == 4:
+                ax.errorbar(x, y, fmt="C0o", capsize=2, capthick=1, elinewidth=1, label="Multi-row", markersize=8)
+            else:
+                ax.errorbar(x, y, fmt="C0o", capsize=2, capthick=1, elinewidth=1, markersize=8)
+        # ax.errorbar(dat_xs, dat_ys, label="Slice thickness")
 
     for probe in moran_dat:
         x = float(probe[4])
@@ -271,7 +289,7 @@ def R_plot():
         mor_xs.append(x)
         mor_ys.append(y)
         # ax.annotate(f"{probe[0]}", (x, y))
-    ax.scatter(mor_xs, mor_ys, marker="x", label="Preclinical transducers (Moran et al.)")
+    ax.errorbar(mor_xs, mor_ys, fmt="C2^", label="Preclinical", capsize=2, capthick=1, elinewidth=1, markersize=8)
 
     for probe in inglis_dat:
         x = float(probe[4])
@@ -279,7 +297,7 @@ def R_plot():
         ing_xs.append(x)
         ing_ys.append(y)
         # ax.annotate(f"{probe[0]}", (x + 0.04, y))
-    ax.scatter(ing_xs, ing_ys, marker="s", label="Endocavity transducers (Inglis et al.)")
+    ax.errorbar(ing_xs, ing_ys, fmt="C3+", label="Endocavity", capsize=2, capthick=1, elinewidth=1, markersize=8)
 
     ax.set_xlim([0, ax.get_xlim()[1]])
     ax.set_ylim([0, ax.get_ylim()[1]])
@@ -289,13 +307,13 @@ def R_plot():
     ys50 = 50 * xs
     ys12 = 12.5 * xs
     ax.plot(xs, ys25, "k-")
-    ax.annotate("R = 25", (xs[-20] + 0.1, ys25[-20]), fontsize="large")
+    ax.annotate("R = 25", (xs[-20] + 0.1, ys25[-20]-3), fontsize=14)
     ax.plot(xs, ys50, "k--")
-    ax.annotate("R = 50", (xs[-55] + 0.07, ys50[-55]), fontsize="large")
+    ax.annotate("R = 50", (xs[-55] + 0.09, ys50[-55]), fontsize=14)
     ax.plot(xs, ys12, "k--")
-    ax.annotate("R = 12.5", (xs[-20], ys12[-20]-3), fontsize="large")
+    ax.annotate("R = 12.5", (xs[-20], ys12[-20]-5), fontsize=14)
 
-    ax.set_xlabel("$D_R$ (mm$^{-1}$)")
+    ax.set_xlabel("$D_R$ (mm)")
     ax.set_ylabel("$L_R$ (mm)")
 
     ax.legend()
@@ -304,7 +322,7 @@ def R_plot():
     plt.show()
 
 
-R_plot()
-# EPP_plot()
+# R_plot()
+EPP_plot()
 # L_alpha()
 # profiles()
