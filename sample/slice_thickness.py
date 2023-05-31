@@ -1,4 +1,4 @@
-from videos import Video
+from sample.videos import Video
 import numpy as np
 import matplotlib.pyplot as plt
 from itertools import pairwise

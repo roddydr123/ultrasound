@@ -4,8 +4,8 @@ from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 import numpy as np
 import matplotlib
-from auto_res_check import calc_R
-from slice_thickness import extract_Ls
+from sample.auto_res_check import calc_R
+from sample.slice_thickness import extract_Ls
 
 plt.style.use("thesis.mplstyle")
 

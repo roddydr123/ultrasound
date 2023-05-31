@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
-from videos import fetch_video_details
-from slice_thickness import process_raw_video_data
+from sample.videos import fetch_video_details
+from sample.slice_thickness import process_raw_video_data
 import pathlib
 
 plt.style.use("thesis.mplstyle")

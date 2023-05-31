@@ -5,7 +5,7 @@ made with an ultrasound machine and Edinburgh Pipe Phantom (EPP).
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from slice_thickness import extract_Ls
+from sample.slice_thickness import extract_Ls
 from scipy.optimize import minimize_scalar
 from scipy.interpolate import interp1d
 

@@ -1,10 +1,10 @@
 # from auto_res import funcy, calc_R
 import numpy as np
-from auto_res_check import calc_R
+from sample.auto_res_check import calc_R
 import matplotlib.pyplot as plt
 # import matplotlib
 from scipy.stats import linregress
-from utils import read_from_excel
+from sample.utils import read_from_excel
 
 plt.style.use("thesis.mplstyle")
 
