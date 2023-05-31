@@ -1,5 +1,5 @@
 from sample.slice_thickness import extract_Ls
-from sample.auto_res_check import calc_R
+from sample.resolution_integral import calc_R
 import numpy as np
 
 

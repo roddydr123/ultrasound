@@ -5,3 +5,4 @@ cpp/
 __pycache__/
 __pycache__/videos.cpython-38.pyc
 env/
+res_int.py

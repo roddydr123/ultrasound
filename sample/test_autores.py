@@ -1,6 +1,6 @@
 # from auto_res import funcy, calc_R
 import numpy as np
-from sample.auto_res_check import calc_R
+from sample.resolution_integral import calc_R
 import matplotlib.pyplot as plt
 # import matplotlib
 from scipy.stats import linregress
