@@ -5,7 +5,7 @@ made with an ultrasound machine and Edinburgh Pipe Phantom (EPP).
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from sample.slice_thickness import extract_Ls
+from slice_thickness import extract_Ls
 from scipy.optimize import minimize_scalar
 from scipy.interpolate import interp1d
 
@@ -118,12 +118,18 @@ def calc_R(lengths:list, inverse_diameters:list, show=True):
         tuple: (Dr, Lr, R) The calculated results.
     """
 
-    # extrapolate to x axis and close integral
+    # lengths must monotonically decrease
+    if lengths[-1] > lengths[0]:
+        lengths = lengths[::-1]
+
+    # inverse diameters must monotonically increase
+    if inverse_diameters[0] > inverse_diameters[-1]:
+        inverse_diameters = inverse_diameters[::-1]
 
     # find smallest detectable pipe index
     s_index = np.argmin(lengths) - 1
 
-
+    # extrapolate to x axis and close integral
     extrap_inverse_diam = inverse_diameters[s_index] - (
         lengths[s_index]
         * (inverse_diameters[s_index - 1] - inverse_diameters[s_index])
