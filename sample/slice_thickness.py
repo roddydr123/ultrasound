@@ -1,4 +1,4 @@
-from sample.videos import Video
+from videos import Video
 import numpy as np
 import matplotlib.pyplot as plt
 from itertools import pairwise
@@ -136,16 +136,19 @@ def process_raw_video_data(dataset, threshold, smoothing_factor):
     return reduced_depths, reduced_st, reduced_pixel_values, dead_zone, LCP
 
 
-def extract_Ls(required_videos:list, pipe_diameters:np.ndarray, threshold:float, smoothing_factor:int, aug=0.0):
+def extract_Ls(required_video_paths:list, pipe_diameters:np.ndarray, threshold:float, smoothing_factor:int, aug=0.0):
     """Takes in videos for a probe and finds the depth range for which a series of
     slice thicknesses are larger.
     """
 
+    # check diameters go from small to big else reverse them.
+    if pipe_diameters[0] > pipe_diameters[-1]:
+        pipe_diameters = pipe_diameters[::-1]
+
     vid_arrays = []
     LCPs = []
     # load in slice thickness plot data
-    for vid_number in required_videos:
-        vid_path = f"{PATH}/scripts/analysed/gen3/vid{vid_number}.txt"
+    for vid_path in required_video_paths:
         dataset = np.genfromtxt(vid_path, dtype=float, delimiter=",").T
 
         # convert to mm
@@ -232,7 +235,7 @@ def extract_Ls(required_videos:list, pipe_diameters:np.ndarray, threshold:float,
     L_list.append(np.max(LCPs) - np.min(LCPs))
     final_diameters.append(np.inf)
 
-    return L_dict, L_list, final_diameters
+    return L_dict, L_list, np.array(final_diameters)
 
 
 def main():
