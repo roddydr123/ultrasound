@@ -9,13 +9,13 @@ import matplotlib.pyplot as plt
 class Video:
     def __init__(self, viddata):
         self.filenumber = viddata["filenumber"]
-        self.filename = f"vid{self.filenumber}.mp4"
+        self.filename = viddata["filename"]
         print(f"Analysing {self.filename}")
         self.filepath = viddata["filepath"]
         self.start_deep = True
         deets = fetch_video_details(self.filepath, self.filenumber)
         self.total_depth_cm = deets["total_depth"]
-        self.cap = cv2.VideoCapture(self.filepath + self.filename)
+        self.cap = cv2.VideoCapture(self.filepath + "/" + self.filename)
         self.roi = deets["ROI"]
         self.total_depth_pixels = self.roi[3]
         self.frame_count = int(self.cap.get(7))
