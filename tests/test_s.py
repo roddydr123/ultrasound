@@ -11,6 +11,7 @@ sys.path.insert(0, SCRIPTS_PATH)
 
 from slice_thickness import extract_Ls
 from resolution_integral import calc_R
+from videos import Video
 
 
 
@@ -58,3 +59,19 @@ def test_calc_R_and_extract_Ls(video_numbs, Resints):
     lengths = np.array(lengths)
 
     assert calc_R(lengths, inverse_diameters, show=False) == Resints
+
+
+def test_slice_thickness():
+    """Test whether the heights, widths, and depths of the slice thickness peaks extracted
+    from the vid50.mp4 video are what they should be."""
+
+    viddata = {"filepath": FILES_PATH, "filenumber": "50", "filename": "vid50.mp4"}
+    vid = Video(viddata)
+
+    widths, depths, heights = vid.get_slice_thickness_data(100)
+
+    data = np.array([depths, widths, heights]).T
+
+    test_data = np.load("files/vid50_test.npy")
+
+    assert np.array_equal(data, test_data)
