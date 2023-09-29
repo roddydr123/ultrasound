@@ -12,6 +12,7 @@ sys.path.insert(0, SCRIPTS_PATH)
 from slice_thickness import extract_Ls
 from resolution_integral import calc_R
 from videos import Video
+from utils import read_from_excel
 
 
 
@@ -75,3 +76,29 @@ def test_slice_thickness():
     test_data = np.load("files/vid50_test.npy")
 
     assert np.array_equal(data, test_data)
+
+
+def calc_R_prepper(all_lengths, diameters):
+    diameters = np.array(diameters) / np.sqrt(
+    np.cos(np.deg2rad(40))
+    )  # convert to effective diameter and reverse
+
+    inverse_diameters = 1 / diameters
+    all_lengths = np.array(all_lengths)
+    return calc_R(all_lengths, inverse_diameters, show=False)
+
+
+def test_calc_R_EPP_data():
+    """Use the length and diameter data from the NHS spreadsheets. Test to make
+    sure the way they're calculated by calc_R has not changed."""
+
+    NHS_results, all_lengths, diameters = read_from_excel()
+    ST_ = []
+
+    for lens in all_lengths:
+        ST_results = calc_R_prepper(lens, diameters)
+        ST_.append(ST_results)
+
+    test_data = np.load("files/EPP_calc_R_results.npy")
+
+    assert np.array_equal(ST_, test_data)
