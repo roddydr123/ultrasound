@@ -118,6 +118,9 @@ def calc_R(lengths:list, inverse_diameters:list, show=True):
         tuple: (Dr, Lr, R) The calculated results.
     """
 
+    # needs to be an array
+    lengths = np.array(lengths)
+
     # lengths must monotonically decrease
     if lengths[-1] > lengths[0]:
         lengths = lengths[::-1]
