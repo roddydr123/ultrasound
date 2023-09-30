@@ -28,7 +28,7 @@ Description of code in `sample/`:
 ### To calculate the resolution integral from a set of lengths and diameters
 
 ```
-from resolution_integral import calc_R`
+from resolution_integral import calc_R
 char_res, depth_field, R = calc_R(lengths, inverse_diameters)
 ```
 
@@ -46,13 +46,11 @@ You'll also need to put some information about the video into a file called "det
 To obtain the ROI for a video, use:
 
 ```
-from sample.roi import get_ROI
+from roi import get_ROI
 get_ROI("/path/to/video/")
 ```
 
-select the region to use as in the image below, press spacebar, and the ROI numbers will be printed to the terminal.
-
-![](nice_results/roi.png)
+select the region to use as in Figure 1, press spacebar, and the ROI numbers will be printed to the terminal.
 
 Once you have all these details you are ready to analyse a video. Use the following code with resolution set to something like 5 (meaning analyse every 5th frame in the video).
 
@@ -91,9 +89,13 @@ lengths = np.array(lengths)
 calc_R(lengths, inverse_diameters, show=False)
 ```
 
+### Figures
 
-![The performance of the code in resolution_integral.py versus an NHS spreadsheet for calculating the resolution integral from Edinburgh Pipe Phantom measurements.](nice_results/codehists.png)
-Figure 1. These histograms show the performance of the code in resolution_integral.py versus an NHS spreadsheet for calculating the resolution integral from Edinburgh Pipe Phantom measurements. The code is much faster and still has high accuracy in most cases.
+![Figure 1. Example of the ROI which should be given for a video. Anything not showing signal from the probe should be excluded.](nice_results/roi.png)
+Figure 1. Example of the ROI which should be given for a video. Anything not showing signal from the probe should be excluded.
 
 ![Example of a slice thickness depth profile extracted from a video, also shows the smoothing and trimming process applied to make the data useable.](nice_results/ST23.png)
 Figure 2. Example of a slice thickness depth profile extracted from a video, also shows the smoothing and trimming process applied to make the data useable.
+
+![The performance of the code in resolution_integral.py versus an NHS spreadsheet for calculating the resolution integral from Edinburgh Pipe Phantom measurements.](nice_results/codehists.png)
+Figure 3. These histograms show the performance of the code in resolution_integral.py versus an NHS spreadsheet for calculating the resolution integral from Edinburgh Pipe Phantom measurements. The code is much faster and still has high accuracy in most cases.
