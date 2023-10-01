@@ -4,8 +4,20 @@ from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 import numpy as np
 import matplotlib
-from sample.resolution_integral import calc_R
-from sample.slice_thickness import extract_Ls
+import sys
+import pathlib
+
+
+p = pathlib.Path(__file__).parents
+SCRIPTS_PATH = str(p[2]) + "/sample"
+FILES_PATH = str(p[2]) + "/analysed/gen3/"
+PATH_TO_DETAILS = str(p[3]) + "/videos"
+PATH_TO_OTHER_DATA = str(p[2]) + "/other_data"
+sys.path.insert(0, SCRIPTS_PATH)
+
+
+from resolution_integral import calc_R
+from slice_thickness import extract_Ls
 
 plt.style.use("thesis.mplstyle")
 
@@ -21,7 +33,7 @@ def profiles():
     colors = ["C0", "k"]
     names = np.arange(200, 1400, 200)
     for i, file in enumerate(names):
-        datai = np.loadtxt(f"analysed/width_expt/30-{file}.txt").T
+        datai = np.loadtxt(f"{SCRIPTS_PATH}/../analysed/width_expt/30-{file}.txt").T
         x = datai[0]
         x *=10
         y = datai[1]
@@ -40,7 +52,7 @@ def profiles():
 
     names = np.arange(400, 1600, 200)
     for i, file in enumerate(names):
-        data = np.loadtxt(f"analysed/width_expt/28-{file}.txt").T
+        data = np.loadtxt(f"{SCRIPTS_PATH}/../analysed/width_expt/28-{file}.txt").T
         x = data[0]
         x *= 10
         y = data[1]
@@ -81,10 +93,14 @@ def L_alpha():
     [78,79,80,81]
     ]
 
+    vid_set = 0
+
+    video_paths = [f"{FILES_PATH}vid{video}.txt" for video in videos[vid_set]]
+
     inv_diameters = np.linspace(0.01, 1.7, 400)
 
-    pipe_diameters = 1 / inv_diameters[::-1]
-    L_dict, lengths, diameters = extract_Ls(videos[0], pipe_diameters, 20, 3)
+    pipe_diameters = 1 / inv_diameters
+    L_dict, lengths, diameters = extract_Ls(video_paths, pipe_diameters, 20, 3)
 
     # lengths = np.array([0.0, 2.9, 26.0, 40.3, 55.0, 71.0, 81.3, 89.7, 93.4, 94.6, 97.2, 98.6])  # NHS data for ML6-15 31/03/15
     # lengths = np.array([0.0,0.0,3.8,18.1,23.9,70.1,85.1,128.6,147.0,165.6,165.1, 192.0]) # NHS data for 9LD 01/04/15
@@ -118,7 +134,7 @@ def L_alpha():
 
 
 def EPP_plot():
-    data = np.loadtxt("analysed/gen3/all_data.txt", delimiter=",", dtype=str, skiprows=1)
+    data = np.loadtxt(f"{FILES_PATH}/all_data.txt", delimiter=",", dtype=str, skiprows=1)
     # format: probe name, EPP R, EPP Dr, EPP Lr,
     # R, R upper, R lower,
     # Dr, Dr upper, Dr lower,
@@ -246,16 +262,15 @@ def EPP_plot():
 def R_plot():
     fig, ax = plt.subplots(figsize=(10, 7))
 
-    # dat = np.loadtxt("analysed/gen3/reduced_Rs.txt", delimiter="\t", skiprows=1, dtype=str)
-    dat = np.loadtxt("analysed/gen3/all_data.txt", delimiter=",", dtype=str, skiprows=1)
+    dat = np.loadtxt(f"{FILES_PATH}/all_data.txt", delimiter=",", dtype=str, skiprows=1)
     dat_xs = []
     dat_ys = []
 
-    moran_dat = np.loadtxt("other_data/moran.txt", delimiter="\t", skiprows=1, dtype=str)
+    moran_dat = np.loadtxt(f"{PATH_TO_OTHER_DATA}/moran.txt", delimiter="\t", skiprows=1, dtype=str)
     mor_xs = []
     mor_ys = []
 
-    inglis_dat = np.loadtxt("other_data/inglis.txt", delimiter="\t", skiprows=1, dtype=str)
+    inglis_dat = np.loadtxt(f"{PATH_TO_OTHER_DATA}/inglis.txt", delimiter="\t", skiprows=1, dtype=str)
     ing_xs = []
     ing_ys = []
 
@@ -323,6 +338,6 @@ def R_plot():
 
 
 # R_plot()
-EPP_plot()
+# EPP_plot()
 # L_alpha()
-# profiles()
+profiles()
