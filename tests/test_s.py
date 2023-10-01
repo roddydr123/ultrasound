@@ -28,13 +28,13 @@ def test_extract_Ls():
 
     L_dict, lengths, diameters = extract_Ls(videos, pipe_diameters, 20, 3)
 
-    with open('files/saved_L_dict.pkl', 'rb') as f:
+    with open(f'{FILES_PATH}/saved_L_dict.pkl', 'rb') as f:
         loaded_dict = pickle.load(f)
 
-    with open('files/saved_lengths.pkl', 'rb') as f:
+    with open(f'{FILES_PATH}/saved_lengths.pkl', 'rb') as f:
         loaded_lengths = pickle.load(f)
 
-    with open('files/saved_diameters.pkl', 'rb') as f:
+    with open(f'{FILES_PATH}/saved_diameters.pkl', 'rb') as f:
         loaded_diameters = pickle.load(f)
 
     assert L_dict == loaded_dict
@@ -73,7 +73,7 @@ def test_slice_thickness():
 
     data = np.array([depths, widths, heights]).T
 
-    test_data = np.load("files/vid50_test.npy")
+    test_data = np.load(f"{FILES_PATH}/vid50_test.npy")
 
     assert np.array_equal(data, test_data)
 
@@ -92,13 +92,21 @@ def test_calc_R_EPP_data():
     """Use the length and diameter data from the NHS spreadsheets. Test to make
     sure the way they're calculated by calc_R has not changed."""
 
-    NHS_results, all_lengths, diameters = read_from_excel()
+    NHS_results, all_lengths, diameters = read_from_excel(FILES_PATH + "/res_ints_only.csv")
     ST_ = []
 
     for lens in all_lengths:
         ST_results = calc_R_prepper(lens, diameters)
         ST_.append(ST_results)
 
-    test_data = np.load("files/EPP_calc_R_results.npy")
+    test_data = np.load(f"{FILES_PATH}/EPP_calc_R_results.npy")
 
     assert np.array_equal(ST_, test_data)
+
+
+def test_calc_R_simple():
+    lengths = [0.0,0.0,0.0,6.1,13.9,17.7,23.2,27.8,27.8,27.8,27.8,28.0]
+
+    inverse_diameters = np.linspace(0, 1.7, 12).tolist()
+
+    assert calc_R(lengths, inverse_diameters, show=False) == (0.906, 25.95, 28.66)
