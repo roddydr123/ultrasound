@@ -55,35 +55,34 @@ char_res, depth_field, R = calc_R(lengths, inverse_diameters)
 
 
 
-### To extract slice thickness data from a video you'll need the path to the folder where the videos are stored and the name of the video to analyse - usually a number.
-
-```
-from videos import Video
-viddata = {"filepath": "/path/to/video/parent/folder", "filenumber": "video number"}
-```
+### To extract slice thickness data from a video
 
 
-You'll also need to put some information about the video into a file called "details.txt" which is located in the same folder as the video itself (an example file is given in this folder). It contains the video number, probe type, total scan depth shown on screen, probe frequency, focal point depths, and the Region Of Interest (ROI) of the ultrasound screen which should be used by the code - only the part of the screen showing the ultrasound signal should be included.
+First, you need to put some information about the video into a file called "details.txt". This contains the video number, probe type, total scan depth shown on screen, probe frequency, focal point depths, and the Region Of Interest (ROI) of the ultrasound screen which should be used by the code (an example can be found in `tests/files/details.txt`).
 
-
-To obtain the ROI for a video, use:
+Most of this data can be found in the scan video, but the ROI needs to be manually selected using
 
 ```
 from roi import get_ROI
 get_ROI("/path/to/video/")
 ```
 
-select the region to use as in Figure 2, press spacebar, and the ROI numbers will be printed to the terminal.
+and select the region to use as in Figure 2, press spacebar, and the ROI numbers will be printed to the terminal. Copy these into details.txt in the correct space.
 
-Once you have all these details you are ready to analyse a video. Use the following code with resolution set to something like 5 (meaning analyse every 5th frame in the video).
+
+Now you can analyse the video! Use the following code with resolution set to something like 5 (meaning analyse every 5th frame in the video). Filenumber is used to fetch the data from details.txt so it might be best to call the videos something like "vid01.mp4", "vid02.mp4" in which case the filenumbers are "01" and "02" (make them strings to include leading zeros).
+
 
 ```
+from videos import Video
+viddata = {"PATH_TO_VIDEO": "path/to/vid.mp4", "filenumber": "e.g. 01",
+           "PATH_TO_DETAILS": "path/to/details.txt"}
 vid = Video(viddata)
-
 vid.save_slice_thickness_data(
-    resolution, /path/to/output.txt"
+    resolution, "/path/to/output.txt"
 )
 ```
+
 
 This will save the slice thickness data to a text file in the format width, depth, height. The width is the slice thickness at that depth, and the height is the peak pixel value.
 
