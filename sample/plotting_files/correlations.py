@@ -7,7 +7,7 @@ from scipy.stats import pearsonr
 frequencies = [5, 9.5, 9.5, 6.5, 6.5, 3.5, 11.75, 11.75, 2.75, 3.75]
 
 
-data = pd.read_csv("analysed/gen3/all_data.txt").drop(["Probe","R upper", "R lower", "Dr upper", "Dr lower", "Lr upper", "Lr lower"], axis=1)
+data = pd.read_csv("../../analysed/gen3/all_data.txt").drop(["Probe","R upper", "R lower", "Dr upper", "Dr lower", "Lr upper", "Lr lower"], axis=1)
 
 data["Frequency"] = frequencies
 
