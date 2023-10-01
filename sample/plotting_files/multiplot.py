@@ -1,18 +1,19 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
-from sample.videos import fetch_video_details
-from sample.slice_thickness import process_raw_video_data
 import pathlib
 
 plt.style.use("thesis.mplstyle")
 
 
 p = pathlib.Path(__file__).parents
-parentpath = p[1]
+SCRIPTS_PATH = str(p[2]) + "/sample"
+FILES_PATH = str(p[2]) + "/analysed/gen3/"
+PATH_TO_DETAILS = str(p[3]) + "/videos"
+sys.path.insert(0, SCRIPTS_PATH)
 
-PATH = f"{parentpath}/scripts/analysed/gen3/"
-PATH_TO_DETAILS = f"{parentpath}/videos/"
+from videos import fetch_video_details
+from slice_thickness import process_raw_video_data
 
 colors = ["C1", "k"]
 labels = ["Un-processed", "Processed"]
@@ -58,7 +59,7 @@ def main():
     data = []
     details_list = []
     for filename in files_to_plot:
-        filepath = f"{PATH}{filename}.txt"
+        filepath = f"{FILES_PATH}{filename}.txt"
         with open(filepath) as file:
             dat = np.genfromtxt(file, delimiter=",").T.tolist()
             data.append(dat)
