@@ -4,18 +4,28 @@ from scipy.signal import find_peaks
 import csv
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from os.path import exists
 
 
 class Video:
     def __init__(self, viddata):
         self.filenumber = viddata["filenumber"]
-        self.filename = viddata["filename"]
-        print(f"Analysing {self.filename}")
-        self.filepath = viddata["filepath"]
+        self.PATH_TO_DETAILS = viddata["PATH_TO_DETAILS"]
+        self.PATH_TO_VIDEO = viddata["PATH_TO_VIDEO"]
+
+        # check the paths work
+        if not exists(self.PATH_TO_VIDEO):
+            raise FileNotFoundError("Path to video file is not working")
+        
+        if not exists(self.PATH_TO_DETAILS):
+            raise FileNotFoundError("Path to details.txt is not working")
+
+        print(f"Analysing {self.PATH_TO_VIDEO}")
+        
         self.start_deep = True
-        deets = fetch_video_details(self.filepath, self.filenumber)
+        deets = fetch_video_details(self.filenumber, self.PATH_TO_DETAILS)
         self.total_depth_cm = deets["total_depth"]
-        self.cap = cv2.VideoCapture(self.filepath + "/" + self.filename)
+        self.cap = cv2.VideoCapture(self.PATH_TO_VIDEO)
         self.roi = deets["ROI"]
         self.total_depth_pixels = self.roi[3]
         self.frame_count = int(self.cap.get(7))
@@ -162,22 +172,22 @@ class Video:
         heights = heights[mask2]
         return widths, depths, heights
 
-    def save_slice_thickness_data(self, resolution, filepath):
-        print(f"--> {filepath}")
+    def save_slice_thickness_data(self, resolution, PATH_TO_VIDEO):
+        print(f"--> {PATH_TO_VIDEO}")
         widths, depths, heights = self.get_slice_thickness_data(resolution)
 
         data = np.array([depths, widths, heights]).T.tolist()
 
-        with open(filepath, "w+") as file:
+        with open(PATH_TO_VIDEO, "w+") as file:
             for i, line in enumerate(data):
                 file.write(f"{line[0]},{line[1]},{line[2]}\n")
 
 
-def fetch_video_details(filepath, filenumber):
+def fetch_video_details(filenumber, PATH_TO_DETAILS):
     """Retrieve the depth from details.txt"""
-    with open(f"{filepath}/details.txt", "r") as file:
+    with open(PATH_TO_DETAILS, "r") as file:
         for line in csv.reader(file, delimiter="\t"):
-            if line[0] == filenumber:
+            if line[0] == str(filenumber):
                 tdepth = float(line[2])
 
                 ROI_tuple = line[5].split(sep=",")
