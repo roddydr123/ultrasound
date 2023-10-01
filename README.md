@@ -27,14 +27,15 @@ It also contains an automated method for calculating the resolution integral, an
 
 Description of code in `sample/`:
 * `resolution_integral.py` calculates the resolution integral from measurements made with an ultrasound machine and Edinburgh Pipe Phantom (EPP).
-* `correlations.py` looks for correlations between any two variables (e.g. frequency and characteristic resolution).
-* `multiplot.py` functions for plotting slice thickness profiles together.
 * `roi.py` used to find the coordinates of the Region of Interest for each ultrasound video and crop out the rest.
-* `Rs_plot.py` used to plot characteristic resolution versus depth of field for all transducers studied here as well as those from other studies.
 * `slice_thickness.py` finds the slice thickness versus depth from a video.
 * `ST_uncertainties.py` calculate the uncertainty in slice thickness values.
-* `utils` function for loading data.
 * `videos.py` called by `slice_thickness.py` to analyse the videos.
+
+* `plotting_files` contains files for making graphs from the data including:
+    - `correlations.py` looks for correlations between any two variables (e.g. frequency and characteristic resolution).
+    - `multiplot.py` functions for plotting slice thickness profiles together.
+    - `Rs_plot.py` used to plot characteristic resolution versus depth of field for all transducers studied here as well as those from other studies.
 
 
 
@@ -96,7 +97,8 @@ pipe_diameters = 1 / inv_diameters
 I make them as inverse diameters first so that they are evenly spaced in inverse diameter space which makes the L-alpha plots look nicer. Then, find the distances over which the scanner could in theory visualise the pipes. I gave this function 4 video paths, two from the scanner with settings optimised for shallow visualisation, and two for deep, but it should work with less/more videos too:
 
 ```
-L_dict, lengths, diameters = extract_Ls(required_video_paths, pipe_diameters, threshold, smoothing_factor)
+L_dict, lengths, diameters = extract_Ls(required_video_paths, pipe_diameters,
+                                        threshold, smoothing_factor)
 ```
 
 Threshold tells the function to exclude any signals lower than a given pixel value, I chose 20. Smoothing factor determines how much to smooth the resultant lengths vs diameters plot as in Figure 1.
