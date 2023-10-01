@@ -12,7 +12,6 @@ sys.path.insert(0, SCRIPTS_PATH)
 from slice_thickness import extract_Ls
 from resolution_integral import calc_R
 from videos import Video
-from utils import read_from_excel
 
 
 
@@ -102,6 +101,14 @@ def test_calc_R_EPP_data():
     test_data = np.load(f"{FILES_PATH}/EPP_calc_R_results.npy")
 
     assert np.array_equal(ST_, test_data)
+
+
+def read_from_excel(filepath):
+    data = np.genfromtxt(filepath, dtype=float, delimiter=",")
+    NHS_results = data[:, :3]
+    all_lengths = data[:, 3:]
+    all_diameters = [0.35,0.42,0.56,0.70,1.0,1.5,2.0,3.0,4.0,6.0,7.9,np.inf]
+    return NHS_results, all_lengths, all_diameters
 
 
 def test_calc_R_simple():
