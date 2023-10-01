@@ -183,11 +183,11 @@ class Video:
                 file.write(f"{line[0]},{line[1]},{line[2]}\n")
 
 
-def fetch_video_details(filenumber, PATH_TO_DETAILS):
+def fetch_video_details(filenumber:str, PATH_TO_DETAILS:str):
     """Retrieve the depth from details.txt"""
     with open(PATH_TO_DETAILS, "r") as file:
         for line in csv.reader(file, delimiter="\t"):
-            if line[0] == str(filenumber):
+            if line[0] == filenumber:
                 tdepth = float(line[2])
 
                 ROI_tuple = line[5].split(sep=",")
