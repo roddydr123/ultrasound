@@ -59,7 +59,9 @@ char_res, depth_field, R = calc_R(lengths, inverse_diameters)
 ### To extract slice thickness data from a video
 
 
-First, you need to put some information about the video into a file called "details.txt". This contains the video number, probe type, total scan depth shown on screen, probe frequency, focal point depths, and the Region Of Interest (ROI) of the ultrasound screen which should be used by the code (an example can be found in `tests/files/details.txt`).
+First, you need to make sure the scan video is useable, an example is `tests/files/vid50.mp4`. The probe should be moved so that the signal goes from the bottom of the screen to the top as the video plays.
+
+Then, put some information about the video into a file called "details.txt". This contains the video number or name, probe type, total scan depth shown on screen, probe frequency, focal point depths, and the Region Of Interest (ROI) of the ultrasound screen which should be used by the code (an example can be found in `tests/files/details.txt`).
 
 Most of this data can be found in the scan video, but the ROI needs to be manually selected using
 
